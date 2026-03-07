@@ -55,3 +55,21 @@ admin.site.unregister(User)
 admin.site.register(User, UserAdmin)
 
 
+from django.contrib import admin
+from .models import Exposition, Piece, Slide
+
+class SlideInline(admin.TabularInline):
+    model = Slide
+    extra = 1
+
+@admin.register(Piece)
+class PieceAdmin(admin.ModelAdmin):
+    list_display = ("title", "qr_slug", "created_at")
+    search_fields = ("title", "qr_slug")
+    inlines = [SlideInline]
+
+@admin.register(Exposition)
+class ExpositionAdmin(admin.ModelAdmin):
+    list_display = ("title", "created_at")
+    search_fields = ("title",)
+    filter_horizontal = ("admins", "pieces")

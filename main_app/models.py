@@ -138,3 +138,61 @@ def create_user_profile(sender, instance, created, **kwargs):
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
+
+#added this part below for creating the database already with described UML
+
+from django.db import models
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+class Exposition(models.Model):
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+
+    admins = models.ManyToManyField(
+        User,
+        related_name="expositions",
+        blank=True,
+    )
+
+    pieces = models.ManyToManyField(
+        "Piece",
+        related_name="expositions",
+        blank=True,
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+
+
+class Piece(models.Model):
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+
+    # Útil para QR: /p/<qr_slug> ou semelhante
+    qr_slug = models.SlugField(max_length=120, unique=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+
+
+class Slide(models.Model):
+    piece = models.ForeignKey(Piece, on_delete=models.CASCADE, related_name="slides")
+    order = models.PositiveIntegerField(default=0)
+
+    title = models.CharField(max_length=200, blank=True)
+    text = models.TextField(blank=True)
+    image = models.ImageField(upload_to="slides/", blank=True, null=True)
+    # opcional:
+    # video_url = models.URLField(blank=True)
+
+    class Meta:
+        ordering = ["order"]
+
+    def __str__(self):
+        return f"{self.piece.title} / slide {self.order}"

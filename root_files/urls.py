@@ -18,17 +18,29 @@ from django.urls import include, path, re_path
 from django.conf.urls.static import static
 from django.conf import settings
 from django.views.i18n import JavaScriptCatalog
+from wagtail.admin import urls as wagtailadmin_urls
+from wagtail import urls as wagtail_urls
+from wagtail.documents import urls as wagtaildocs_urls
+
+
+
 
 urlpatterns = [
-    path('', include('main_app.urls', namespace='main_app')),
-    path('admin/', admin.site.urls, name='administration'),
-    path('jsi18n/',JavaScriptCatalog.as_view(), name='javascript-catalog'),
-    path('i18n/', include('django.conf.urls.i18n')),
-    path('summernote/', include('django_summernote.urls')),
-    path('', include('social_django.urls', namespace='social')),
-    path('', include('main_app.userAdmin.urls')),
-    path('FREE_maps/',include('FREE_maps.urls'),name='FREE_maps'),
+    path("", include(("main_app.urls", "main_app"), namespace="main_app")),
 
+    path("admin/", admin.site.urls),
+    path("cms/", include(wagtailadmin_urls)),
+    path("documents/", include(wagtaildocs_urls)),
+    path("pages/", include(wagtail_urls)),
+
+    path("jsi18n/", JavaScriptCatalog.as_view(), name="javascript-catalog"),
+    path("i18n/", include("django.conf.urls.i18n")),
+    path("summernote/", include("django_summernote.urls")),
+
+    path("auth/", include("social_django.urls", namespace="social")),
+    path("useradmin/", include("main_app.userAdmin.urls")),
+
+    path("FREE_maps/", include("FREE_maps.urls")),
 ]
 
 if settings.DEBUG:

@@ -69,6 +69,21 @@ INSTALLED_APPS = [
     'countries_plus',
     'django.contrib.gis', 
     'leaflet',
+    'wagtail.contrib.forms',
+    'wagtail.contrib.redirects',
+    'wagtail.embeds',
+    'wagtail.sites',
+    'wagtail.users',
+    'wagtail.snippets',
+    'wagtail.documents',
+    'wagtail.images',
+    'wagtail.search', 
+    'wagtail.admin', 
+    'wagtail',
+    'pages',
+
+    'modelcluster',
+    'taggit',
 ]
 
 MIDDLEWARE = [
@@ -81,6 +96,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'wagtail.contrib.redirects.middleware.RedirectMiddleware',
 ]
 
 ROOT_URLCONF = 'root_files.urls'
@@ -208,6 +224,13 @@ STATIC_URL = '/static/'
 MEDIA_URL = '/images/'
 MEDIA_ROOT =  os.path.join(BASE_DIR, 'main_app/media')
 
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 10_000
+
+
+WAGTAILDOCS_EXTENSIONS = ['csv', 'docx', 'key', 'odt', 'pdf', 'pptx', 'rtf', 'txt', 'xlsx', 'zip']
+
+
+
 STATICFILES_DIRS = []
 
 # Default primary key field type
@@ -300,9 +323,16 @@ if env.bool('MAIN_APP_FENIX_OAUTH'):
 
 
 
-PROJECT_NAME=env.str('PROJECT_NAME','World Pendulum Alliance')
-PROJECT_ACRONYMUM=env.str('PROJECT_ACRONYMUM', 'WPA')
+PROJECT_NAME=env.str('PROJECT_NAME','Museum In Your Pocket')
+PROJECT_ACRONYMUM=env.str('PROJECT_ACRONYMUM', 'MIYP')
 SITE_NAME=env.str('SITE_NAME','') 
+
+WAGTAIL_SITE_NAME = SITE_NAME
+WAGTAILADMIN_BASE_URL = "http://localhost:8000"
+WAGTAIL_SITE_NAME = env.str('SITE_NAME', PROJECT_NAME)
+
+
+
 if env.bool('CACHE'):
     if env.str('CACHE_TYPE') == 'locmemc':
         CACHES = {
