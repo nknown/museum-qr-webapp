@@ -1,0 +1,160 @@
+{% extends 'free/base.html' %}
+{% load static %}
+{% load i18n %}
+{% load django_tables2 %}
+
+{% block headscript%}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.slim.min.js" integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI=" crossorigin="anonymous"></script>
+{% endblock %}
+
+{% block content %}
+
+
+
+<div class=" sixteen wide column" id="content">
+    <div style="padding-top:17px;padding-bottom:10px">
+        <h1 >Executions in database and cleanup</h1>
+     </div>
+
+    <div class="ui raised very padded text container segment">
+        <h2> Finished Executions with available results</h2>
+        <div>
+            <canvas id="finished_myChart"></canvas>
+        </div>
+    </div>
+    <div class="ui raised very padded text container segment">
+        <h2> Unfinished Executions without available results</h2>
+
+        <div>
+            <canvas id="non_finished_myChart"></canvas>
+        </div>
+    </div>
+    <div class="ui raised very padded text container segment">
+        <div class="ui form">
+            <div class="ui text">
+                To delete older executions, define a threshold in the next form. <br>
+                Executions older than the threshold (and corresponding results) will be permanently deleted.
+            </div>
+            <div class="inline  field">
+                <label>Threshold</label>
+                <input class="three wide" type="number" id="days-input" placeholder="Number of days"> 
+                <label>Threshold should be higher than 30. <br>Smaller values will delete more experiments.        </label>
+            </div>     
+            <button class="ui button" onclick='delete_older("all")'>Delete all</button>          <button class="ui button" onclick='delete_older("incomplete")'>Delete incomplete</button> 
+
+        </div>
+    </div>
+</div>
+
+<script>
+
+
+    function delete_older(query){
+        // '{"experiment_name": "Pendulo", "config_experiment": {"DeltaX":'+ String(DeltaX)+', "Samples":'+String(Samples)+' }}'
+        HEADERS = {
+            "X-CSRFToken":'{{ csrf_token }}',
+            }
+         console.log("delete")
+        n_days = $("#days-input").val()
+        console.log(n_days)
+        endpoint="/free-admin/executions/delete/"+n_days+"/"+query
+
+        axios({
+            method: 'delete', //you can set what request you want to be
+            url: endpoint,
+            headers: HEADERS,
+        }).then(response => {
+            console.log('delete', response);
+            location.reload();
+        }).catch(console);
+    }
+
+    $(document).ready(function() {
+        const finished_data = {
+            labels: {{finished_executions_creation_dates}},
+            datasets: [{
+                label: 'Finished Experiments',
+                backgroundColor: 'rgb(0, 255, 0)',
+                borderColor: 'rgb(255, 99, 132)',
+                data: {{finished_executions_creation_count}},
+            }]
+        };
+
+        const finished_config = {
+            type: 'bar',
+            data: finished_data,
+            options: {
+                scales: {
+                y: {
+                    title:{
+                        display: true,
+                        text: "Number of experiments"
+                    },
+                    ticks: {
+                        precision: 0
+                    },
+                    beginAtZero: true
+                },
+                x: {
+                    title:{
+                        display: true,
+                        text: "Experiment Age (Days since creation)"
+                    },
+                }
+                }
+            },
+        };
+
+
+
+        const finished_myChart = new Chart(document.getElementById('finished_myChart'), finished_config );
+
+        const non_finished_data = {
+            labels: {{non_finished_executions_creation_dates}},
+            datasets: [{
+                label: 'Non Finished Experiments',
+                backgroundColor: 'rgb(255, 0, 0)',
+                borderColor: 'rgb(255, 99, 132)',
+                data: {{non_finished_executions_creation_count}},
+            }]
+        };
+
+        const non_finished_config = {
+            type: 'bar',
+            data: non_finished_data,
+            options: {
+                scales: {
+                y: {
+                    title:{
+                        display: true,
+                        text: "Number of experiments"
+                    },
+                    ticks: {
+                        precision: 0
+                    },
+                    beginAtZero: true
+                },
+                x: {
+                    title:{
+                        display: true,
+                        text: "Experiment Age (Days since creation)"
+                    },
+                }
+                }
+            },
+        };
+
+
+
+        const non_finished_myChart = new Chart(document.getElementById('non_finished_myChart'), non_finished_config );
+
+
+
+    })
+  </script>
+
+{% endblock %}
+
+

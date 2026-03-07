@@ -1,0 +1,59 @@
+{% extends "main_app/layout/base.html" %}
+{% load static %}
+{% load i18n %}
+{% load leaflet_tags %}
+
+{% block headscript %}
+   {% leaflet_js plugins="forms" %}
+   {% leaflet_css plugins="forms" %}
+{{ form.media.css }}
+{{ form.media.js }}
+{% endblock %}
+
+<style>
+
+    .dj_map {
+    width: 600px;
+    height: 400px;
+}
+</style>
+{% block content %}
+
+
+
+    <div class="right floated sixteen wide  column" id="content">
+        <div class="ui centered grid">
+            <div class="row">
+                <div class=" ui sixteen wide column">
+                    <div class="ui header segment">
+                        <h2>New Thing</h2>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="row">
+                <div class=" ui sixteen wide column">
+                    <div class="ui segment">
+                        <form class="ui form{% if errors %} error{% endif %}"  method="post">
+                            {% csrf_token %}{{  form }}
+
+                                <div class="ui divider"></div>
+                                <button class="ui primary button" type="submit">Submit</button>
+                                
+                        </form>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+{% endblock %}

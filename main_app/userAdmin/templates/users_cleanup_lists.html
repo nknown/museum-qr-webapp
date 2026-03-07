@@ -1,0 +1,24 @@
+{% extends 'free/base.html' %}
+{% load static %}
+{% load i18n %}
+{% load django_tables2 %}
+
+{% block headscript%}
+{% endblock %}
+
+{% block content %}
+
+<div class=" sixteen wide  column" id="content">
+        <h1 >External users in database and cleanup</h1>
+
+
+    {% render_table table %}
+ 
+</div>
+{% endblock %}
+
+{% include 'free/layout/scripts.html' %}
+
+
+
+ 
