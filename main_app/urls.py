@@ -60,6 +60,25 @@ urlpatterns = [
     path('spatialthing/<int:pk>/update', views.SpatialThingUpdateView.as_view(), name='spatial-thing-update'), 
 
 
+    # exposition / piece hierarchy
+    path('expositions', views.ExpositionsListView.as_view(), name='expositions-list'),
+    path('exposition/create', views.ExpositionCreateView.as_view(), name='exposition-create'),
+    path('exposition/<int:pk>', views.ExpositionView.as_view(), name='exposition'),
+    path('exposition/<int:pk>/update', views.ExpositionUpdateView.as_view(), name='exposition-update'),
+
+    path('exposition/<int:expo_pk>/pieces', views.PiecesListView.as_view(), name='pieces-by-exposition'),
+    path('exposition/<int:expo_pk>/piece/create', views.PieceCreateView.as_view(), name='piece-create'),
+
+    path('pieces', views.PiecesListView.as_view(), name='pieces-list'),
+    path('piece/<int:pk>', views.PieceView.as_view(), name='piece'),
+    path('piece/<int:pk>/update', views.PieceUpdateView.as_view(), name='piece-update'),
+
+    path('slides', views.SlidesListView.as_view(), name='slides-list'),
+
+    # utility pages
+    path('visits', views.VisitsView.as_view(), name='visits'),
+    path('statistics', views.StatisticsView.as_view(), name='statistics'),
+    path('admin-redirect', views.AdminRedirectView.as_view(), name='admin-redirect'),
 
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

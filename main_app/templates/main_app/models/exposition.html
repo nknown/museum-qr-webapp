@@ -1,0 +1,44 @@
+{% extends base %}
+{% load static %}
+{% load i18n %}
+
+{% block content %}
+<h2>{{ exposition.title }}</h2>
+
+<div class="ui sixteen wide  column"  id="content">
+    <div class ="ui centered grid">
+        <div class="row">
+            <div class=" ui sixteen wide column">
+                <div class="ui header segment">
+                    <h2> <i class="cubes icon"></i>{{ exposition.title }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <p>{{ exposition.description }}</p>
+
+    <div class="ui segment">
+        <h3>{% trans "Pieces" %}</h3>
+        <a href="{% url 'main_app:piece-create' expo_pk=exposition.pk %}"><button class='ui button'>{% trans 'Add piece' %}</button></a>
+        <table class="ui celled table">
+            <thead>
+                <tr><th>{% trans "Title" %}</th><th>{% trans "QR slug" %}</th><th></th></tr>
+            </thead>
+            <tbody>
+            {% for piece in pieces %}
+                <tr>
+                    <td>{{ piece.title }}</td>
+                    <td>{{ piece.qr_slug }}</td>
+                    <td><a href="{% url 'main_app:piece' piece.pk %}">{% trans "Show" %}</a></td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="3">{% trans "No pieces yet." %}</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+{% endblock %}

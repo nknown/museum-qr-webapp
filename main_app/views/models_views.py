@@ -179,3 +179,164 @@ class SpatialThingUpdateView(LoginRequiredMixin, UpdateView):
     template_name = 'main_app/models/spatial_thing_edit.html'
     success_url = reverse_lazy('main_app:spatial-things-list')
 
+
+# ----------------------- exposition / piece / slide code -----------------------
+
+from django.shortcuts import get_object_or_404
+
+class ExpositionsTable(Table):
+    action = TemplateColumn(template_name='main_app/models/expositions_table_link.html')
+
+    class Meta:
+        model = Exposition
+        fields = ['title', 'created_at']
+
+
+class ExpositionsListView(LoginRequiredMixin, SingleTableView):
+    template_name = 'main_app/models/expositions_table.html'
+    table_class = ExpositionsTable
+
+    def get_queryset(self):
+        return Exposition.objects.filter(admins=self.request.user)
+
+
+class ExpositionView(LoginRequiredMixin, TemplateView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        expo = get_object_or_404(Exposition, pk=kwargs['pk'])
+        context['exposition'] = expo
+        context['pieces'] = expo.pieces.all()
+        context['base'] = "main_app/layout/base.html"
+        return context
+
+    def get_template_names(self):
+        return ['main_app/models/exposition.html']
+
+
+class ExpositionForm(ModelForm):
+    class Meta:
+        model = Exposition
+        fields = ['title', 'description', 'admins']
+
+
+class ExpositionCreateView(LoginRequiredMixin, CreateView):
+    model = Exposition
+    form_class = ExpositionForm
+    template_name = 'main_app/models/exposition_edit.html'
+
+    def get_success_url(self):
+        return reverse('main_app:expositions-list')
+
+    def form_valid(self, form):
+        resp = super().form_valid(form)
+        self.object.admins.add(self.request.user)
+        return resp
+
+
+class ExpositionUpdateView(LoginRequiredMixin, UpdateView):
+    model = Exposition
+    form_class = ExpositionForm
+    template_name = 'main_app/models/exposition_edit.html'
+
+    def get_success_url(self):
+        return reverse('main_app:exposition', kwargs={'pk': self.object.pk})
+
+
+# pieces
+class PiecesTable(Table):
+    action = TemplateColumn(template_name='main_app/models/pieces_table_link.html')
+
+    class Meta:
+        model = Piece
+        fields = ['title', 'qr_slug', 'created_at']
+
+
+class PiecesListView(LoginRequiredMixin, SingleTableView):
+    template_name = 'main_app/models/pieces_table.html'
+    table_class = PiecesTable
+
+    def get_queryset(self):
+        expo_pk = self.kwargs.get('expo_pk')
+        if expo_pk:
+            expo = get_object_or_404(Exposition, pk=expo_pk)
+            return expo.pieces.all()
+        return Piece.objects.all()
+
+
+class PieceView(LoginRequiredMixin, TemplateView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        piece = get_object_or_404(Piece, pk=kwargs['pk'])
+        context['piece'] = piece
+        context['pages'] = piece.wagtail_pages.all() if hasattr(piece, 'wagtail_pages') else []
+        context['base'] = "main_app/layout/base.html"
+        return context
+
+    def get_template_names(self):
+        return ['main_app/models/piece.html']
+
+
+class PieceForm(ModelForm):
+    class Meta:
+        model = Piece
+        fields = ['title', 'description', 'qr_slug']
+
+
+class PieceCreateView(LoginRequiredMixin, CreateView):
+    model = Piece
+    form_class = PieceForm
+    template_name = 'main_app/models/piece_edit.html'
+
+    def form_valid(self, form):
+        resp = super().form_valid(form)
+        expo_pk = self.kwargs.get('expo_pk')
+        if expo_pk:
+            expo = get_object_or_404(Exposition, pk=expo_pk)
+            expo.pieces.add(self.object)
+        return resp
+
+    def get_success_url(self):
+        expo_pk = self.kwargs.get('expo_pk')
+        if expo_pk:
+            return reverse('main_app:exposition', kwargs={'pk': expo_pk})
+        return reverse('main_app:pieces-list')
+
+
+class PieceUpdateView(LoginRequiredMixin, UpdateView):
+    model = Piece
+    form_class = PieceForm
+    template_name = 'main_app/models/piece_edit.html'
+
+    def get_success_url(self):
+        return reverse('main_app:piece', kwargs={'pk': self.object.pk})
+
+
+# slides
+class SlidesTable(Table):
+    action = TemplateColumn(template_name='main_app/models/slides_table_link.html')
+
+    class Meta:
+        model = Slide
+        fields = ['piece', 'order', 'title']
+
+
+class SlidesListView(LoginRequiredMixin, SingleTableView):
+    template_name = 'main_app/models/slides_table.html'
+    table_class = SlidesTable
+
+    def get_queryset(self):
+        return Slide.objects.all()
+
+
+# utility pages
+class VisitsView(LoginRequiredMixin, TemplateView):
+    template_name = 'main_app/models/visits.html'
+
+
+class StatisticsView(LoginRequiredMixin, TemplateView):
+    template_name = 'main_app/models/statistics.html'
+
+
+class AdminRedirectView(RedirectView):
+    pattern_name = 'admin:index'
+

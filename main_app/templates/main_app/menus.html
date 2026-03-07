@@ -7,9 +7,10 @@
 </div>
 {% if user.is_authenticated  and  'lti_user' not in user.groups.get.name %}
 
-<a class="item" href="{% url 'main_app:index' %}"><i class="home icon"></i>{% trans 'Home' %}</a>
-<a class="item" href="{% url 'main_app:executions-configured' %}"><i class="chart bar icon"></i>{% trans 'Configured Executions' %}</a>
-<a class="item" href="{% url 'main_app:executions-finished' %}"><i class="chart bar icon"></i>{% trans 'Finished Executions' %}</a>
-<a class="item" href="{% url 'main_app:things-list' %}"><i class="chart bar icon"></i>{% trans 'Things' %}</a>
-<a class="item" href="{% url 'main_app:spatial-things-list' %}"><i class="chart bar icon"></i>{% trans 'Spatial Things' %}</a>
+<a class="item" href="{% url 'main_app:expositions-list' %}"><i class="chart bar icon"></i>{% trans 'Expositions' %}</a>
+<a class="item" href="{% url 'main_app:pieces-list' %}"><i class="chart bar icon"></i>{% trans 'Pieces' %}</a>
+<a class="item" href="{% url 'main_app:slides-list' %}"><i class="chart bar icon"></i>{% trans 'Slideshows' %}</a>
+<a class="item" href="{% url 'main_app:visits' %}"><i class="chart bar icon"></i>{% trans 'Visits' %}</a>
+<a class="item" href="{% url 'main_app:statistics' %}"><i class="chart bar icon"></i>{% trans 'Statistics' %}</a>
+<a class="item" href="{% url 'main_app:admin-redirect' %}"><i class="chart bar icon"></i>{% trans 'Admin' %}</a>
 {% endif %}
