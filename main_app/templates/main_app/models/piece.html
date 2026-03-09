@@ -27,7 +27,9 @@
             <li>{% trans "No pages created yet." %}</li>
         {% endfor %}
         </ul>
-        <p><a href="{% url 'wagtailadmin_pages:add' 'pages' 'contentpage' %}?piece={{ piece.id }}">{% trans "Add new content page" %}</a></p>
+        {# wagtailadmin_pages:add expects app, model, and parent page id #}
+        {# use the root page id (1). adjust if your site uses different root. #}
+        <p><a href="{% url 'wagtailadmin_pages:add' 'pages' 'contentpage' 1 %}?piece={{ piece.id }}">{% trans "Add new content page" %}</a></p>
     </div>
 
 </div>
