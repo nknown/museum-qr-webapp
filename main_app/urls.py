@@ -67,7 +67,10 @@ urlpatterns = [
     path('exposition/<int:pk>/update', views.ExpositionUpdateView.as_view(), name='exposition-update'),
 
     path('exposition/<int:expo_pk>/pieces', views.PiecesListView.as_view(), name='pieces-by-exposition'),
-    path('exposition/<int:expo_pk>/piece/create', views.PieceCreateView.as_view(), name='piece-create'),
+    # allow creating a piece directly, optionally associated later
+    path('piece/create', views.PieceCreateView.as_view(), name='piece-create'),
+    # route used when starting from an exposition
+    path('exposition/<int:expo_pk>/piece/create', views.PieceCreateView.as_view(), name='piece-create-from-expo'),
 
     path('pieces', views.PiecesListView.as_view(), name='pieces-list'),
     path('piece/<int:pk>', views.PieceView.as_view(), name='piece'),
