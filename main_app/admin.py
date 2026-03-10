@@ -7,32 +7,31 @@ from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from modeltranslation.admin import TabbedTranslationAdmin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from django_summernote.admin import SummernoteModelAdmin
+#from django_summernote.admin import SummernoteModelAdmin  # not used any more
 from semantic_admin import SemanticModelAdmin, SemanticStackedInline, SemanticTabularInline
 
 from main_app.models import *
+
+# unregister models that should not appear in the main_app admin
+for m in (Execution, Thing, SpatialThing):
+    try:
+        admin.site.unregister(m)
+    except admin.sites.NotRegistered:
+        pass
+
+# unregister summernote attachment to keep admin minimal
+try:
+    from django_summernote.models import Attachment
+    admin.site.unregister(Attachment)
+except Exception:
+    pass
 
 admin.site.site_title = _('Main Administration')
 admin.site.site_header = _('Main Administration')
 admin.site.index_title = _('Main Administration')
 
-class ThingAdmin(SemanticModelAdmin):
-    list_display = ['id', 'name', 'user', 'created_at', 'client_country']
-    list_filter = ['user']
-admin.site.register(Thing, ThingAdmin)
-
-
-class SpatialThingAdmin(LeafletGeoAdmin):
-    list_display = ['id', 'name', 'user', 'created_at', 'points', 'limits']
-    list_filter = ['user']
-
-admin.site.register(SpatialThing, SpatialThingAdmin)
-
-
-class ExecutionAdmin(SemanticModelAdmin):
-    list_display = ['user', '__str__', 'created_at',  'start', 'end', 'client_country']
-    list_filter = ['user']
-admin.site.register(Execution, ExecutionAdmin)
+# things, spatialthings and executions have been unregistered above
+# (they are intentionally omitted per the teacher's request)
 
 
 
