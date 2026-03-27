@@ -209,5 +209,4 @@ __marimo__/
 #big location file to ignore
 geoip_db/
 *.mmdb
-db.sqlite3-*
 *-journal

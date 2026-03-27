@@ -1,0 +1,52 @@
+{% extends base %}
+{% load static %}
+{% load i18n %}
+
+
+
+
+
+{% block content %}
+<h2>{{thing.id}}</h2>
+
+
+<div class="ui sixteen wide  column"  id="content">
+    <div class ="ui centered grid">
+        <div class="row">
+            <div class=" ui sixteen wide column">
+                <div class="ui header segment">
+                    <h2> <i class="cogs icon"></i>{{thing}}</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <table class="ui celled table">
+        </body>
+            <tr>    
+                <td >User</td>
+                <td >{{thing.user}}</td>
+            </tr>
+            <tr>
+                <td >name</td>
+                <td >{{thing.name}}</td>
+            </tr>
+            <tr>
+                <td >Config</td>
+                <td >{{thing.config}}</td>
+            </tr>
+            <tr>
+                <td >Created</td>
+                <td >{{thing.created_at}}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
+
+
+
+
+
