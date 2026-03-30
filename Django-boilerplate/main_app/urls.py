@@ -39,6 +39,13 @@ urlpatterns = [
     path('execution/<int:pk>/bare', views.ExecutionStrippedView.as_view(), name='stripped-execution'),
     path('execution/create/<int:apparatus_id>/<int:protocol_id>/bare', views.CreateExecutionStrippedView.as_view(), name='stripped-execution-create'),
 
+   # exhibition / piece hierarchy
+    path('exhibitions', views.ExhibitionsListView.as_view(), name='exhibitions-list'),
+    path('exhibition/create', views.ExhibitionCreateView.as_view(), name='exhibition-create'),
+    path('exhibition/<int:pk>', views.ExhibitionView.as_view(), name='exhibition'),
+    path('exhibition/<int:pk>/update', views.ExhibitionUpdateView.as_view(), name='exhibition-update'),
+
+
 
     # REST API
     path('api/v1/version', views.Version.as_view(), name='api-version'),

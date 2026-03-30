@@ -259,6 +259,10 @@ msgstr "Lista das suas execuções"
 msgid "Configuration data"
 msgstr "Dados de configuração"
 
+
+
+
+
 #: free/templates/free/experiment.html:153
 #, fuzzy
 #| msgid "Execution"
@@ -394,6 +398,10 @@ msgstr "Atribuir Stream"
 #: free/views/pages.py:109
 msgid "Current status"
 msgstr "Estado actual"
+
+#: main_app/templates/main_app/menus.html:12
+msgid "Exhibitions"
+msgstr "Exposições"
 
 #~ msgid " Apparatus: "
 #~ msgstr " Aparato: "

@@ -22,6 +22,69 @@ from root_files import settings
 import requests
 from django.contrib.gis.db import models as geo_models
 
+
+#return 404 if object does not exist or user does not have permissions to see it
+from django.shortcuts import get_object_or_404
+
+class ExhibitionsTable(Table):
+    action = TemplateColumn(template_name='main_app/models/exhibitions_table_link.html')
+
+    class Meta:
+        model = Exhibition
+        fields = ['name', 'description']
+
+
+class ExhibitionsListView(LoginRequiredMixin, SingleTableView):
+    template_name = 'main_app/models/exhibitions_table.html'
+    table_class = ExhibitionsTable
+
+    def get_queryset(self):
+        return Exhibition.objects.filter(admins=self.request.user)
+
+
+class ExhibitionView(LoginRequiredMixin, TemplateView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        expo = get_object_or_404(Exhibition, pk=kwargs['pk'])
+        context['exhibition'] = expo
+        #context['pieces'] = expo.pieces.all()
+        context['base'] = "main_app/layout/base.html"
+        return context
+
+    def get_template_names(self):
+        return ['main_app/models/exhibition.html']
+
+
+class ExhibitionForm(ModelForm):
+    class Meta:
+        model = Exhibition
+        fields = ['name', 'description']
+
+
+class ExhibitionCreateView(LoginRequiredMixin, CreateView):
+    model = Exhibition
+    form_class = ExhibitionForm
+    template_name = 'main_app/models/exhibition_edit.html'
+
+    def get_success_url(self):
+        return reverse('main_app:exhibitions-list')
+
+    def form_valid(self, form):
+        resp = super().form_valid(form)
+        self.object.admins.add(self.request.user)
+        return resp
+
+
+class ExhibitionUpdateView(LoginRequiredMixin, UpdateView):
+    model = Exhibition
+    form_class = ExhibitionForm
+    template_name = 'main_app/models/exhibition_edit.html'
+
+    def get_success_url(self):
+        return reverse('main_app:exhibition', kwargs={'pk': self.object.pk})
+
+
+
 ################ VIEWS for the Thing Model
 #### create list of things
 # List1 - Create a Table
@@ -127,12 +190,12 @@ class ThingUpdateView(LoginRequiredMixin, UpdateView):
 #    def get_queryset(self):
 #        return SpatialThing.objects.filter(user=self.request.user)
 
-class SpatialThingView(LoginRequiredMixin, TemplateView):
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['spatialthing'] = SpatialThing.objects.get(pk=kwargs['pk'])
-        context['base'] = "main_app/layout/base.html"
-        return context
+#class SpatialThingView(LoginRequiredMixin, TemplateView):
+#    def get_context_data(self, **kwargs):
+#        context = super().get_context_data(**kwargs)
+#        context['spatialthing'] = SpatialThing.objects.get(pk=kwargs['pk'])
+#        context['base'] = "main_app/layout/base.html"
+#        return context
 
     def get_template_names(self):
         return ['main_app/models/spatial_thing.html']

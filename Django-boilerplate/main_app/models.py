@@ -19,15 +19,15 @@ from wagtail.fields import RichTextField
 
 
 class Exhibition(models.Model):
-    name = RichTextField(blank=False, default='New Exposition')
-    description = RichTextField(blank=True)
+    name = models.CharField(max_length=255, blank=False, default='New Exhibition')
+    description = models.TextField(blank=False, default='Exhibition description')
 
     # Optional: keep if you really want explicit exposition managers
-    #admins = models.ManyToManyField(
-    #    User,
-    #    related_name="managed_expositions",
-    #    blank=True,
-    #)
+    admins = models.ManyToManyField(
+        User,
+        related_name="managed_exhibitions",
+        blank=True,
+    )
 
     #parent_page_types = ["wagtailcore.Page"]
     #subpage_types = ["main_app.Piece"]
@@ -38,8 +38,8 @@ class Exhibition(models.Model):
     #]
 
     class Meta:
-        verbose_name = "Exposition"
-        verbose_name_plural = "Expositions"
+        verbose_name = "Exhibition"
+        verbose_name_plural = "Exhibitions"
 
 
 

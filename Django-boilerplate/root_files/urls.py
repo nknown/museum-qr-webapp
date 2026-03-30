@@ -18,6 +18,9 @@ from django.urls import include, path, re_path
 from django.conf.urls.static import static
 from django.conf import settings
 from django.views.i18n import JavaScriptCatalog
+from wagtail.admin import urls as wagtailadmin_urls
+from wagtail.documents import urls as wagtaildocs_urls
+from wagtail import urls as wagtail_urls
 
 urlpatterns = [
     path('', include('main_app.urls', namespace='main_app')),
@@ -28,6 +31,9 @@ urlpatterns = [
     path('', include('social_django.urls', namespace='social')),
     path('', include('main_app.userAdmin.urls')),
     path('FREE_maps/',include('FREE_maps.urls'),name='FREE_maps'),
+    path('admin/wagtail/', include(wagtailadmin_urls)),
+    path('cms/', include(wagtail_urls)),
+    path('documents/', include(wagtaildocs_urls)),
 
 ]
 

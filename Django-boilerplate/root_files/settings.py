@@ -18,6 +18,10 @@ import sys
 env = environ.Env()
 environ.Env.read_env()
 
+
+# URL used in Wagtail-generated absolute links (emails, user bar, etc.)
+WAGTAILADMIN_BASE_URL = env.str("WAGTAILADMIN_BASE_URL", default="http://localhost:8000")
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -71,6 +75,15 @@ INSTALLED_APPS = [
     'leaflet',
     'wagtail',
     "wagtail_modeladmin",
+    "wagtail.admin",
+    "wagtail.users",
+    "wagtail.sites",
+    "wagtail.snippets",
+    "wagtail.documents",
+    "wagtail.images",
+    "wagtail.search",
+    "modelcluster",
+    "taggit",
 ]
 
 MIDDLEWARE = [
