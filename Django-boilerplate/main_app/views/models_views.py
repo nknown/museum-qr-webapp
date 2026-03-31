@@ -1,13 +1,13 @@
 from django.utils.translation import gettext_lazy as _
 from django.urls import reverse_lazy, reverse
-from django.views.generic import TemplateView, TemplateView, DetailView
+from django.views.generic import TemplateView, DetailView
 from django.forms import ModelForm
 from django import forms
 
 from main_app.views.api import ExecutionSerializer
 from main_app.models import *
 
-from django_tables2 import Table, TemplateColumn, Column
+from django_tables2 import DateTimeColumn, Table, TemplateColumn, Column
 from django_tables2.views import SingleTableView
 from django.views.generic.base import RedirectView
 from django.views.generic.edit import FormView
@@ -23,15 +23,22 @@ import requests
 from django.contrib.gis.db import models as geo_models
 
 
-#return 404 if object does not exist or user does not have permissions to see it
-from django.shortcuts import get_object_or_404
+
+
+class PiecesTable(Table):
+    action = TemplateColumn(template_name='main_app/models/pieces_table_link.html')
+    date_created = DateTimeColumn(format="Y-m-d H:i")
+    class Meta:
+        model = Piece
+
+        fields = ['title', 'description', 'date_created', 'action']
 
 class ExhibitionsTable(Table):
     action = TemplateColumn(template_name='main_app/models/exhibitions_table_link.html')
 
     class Meta:
         model = Exhibition
-        fields = ['name', 'description']
+        fields = ['title', 'description']
 
 
 class ExhibitionsListView(LoginRequiredMixin, SingleTableView):
@@ -47,7 +54,7 @@ class ExhibitionView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         expo = get_object_or_404(Exhibition, pk=kwargs['pk'])
         context['exhibition'] = expo
-        #context['pieces'] = expo.pieces.all()
+        context['pieces'] = expo.pieces.all()
         context['base'] = "main_app/layout/base.html"
         return context
 
@@ -58,7 +65,7 @@ class ExhibitionView(LoginRequiredMixin, TemplateView):
 class ExhibitionForm(ModelForm):
     class Meta:
         model = Exhibition
-        fields = ['name', 'description']
+        fields = ['title', 'description']
 
 
 class ExhibitionCreateView(LoginRequiredMixin, CreateView):
@@ -80,9 +87,74 @@ class ExhibitionUpdateView(LoginRequiredMixin, UpdateView):
     form_class = ExhibitionForm
     template_name = 'main_app/models/exhibition_edit.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['pieces_table'] = PiecesTable(self.object.pieces.all())
+        return context
+
     def get_success_url(self):
         return reverse('main_app:exhibition', kwargs={'pk': self.object.pk})
+    
+class ExhibitionAddPiecesView(LoginRequiredMixin, RedirectView):
+    def get_redirect_url(self, *args, **kwargs):
+        return reverse('main_app:piece-create', kwargs={'exhibition_id': kwargs['pk']})
 
+
+class PieceForm(ModelForm):
+    class Meta:
+        model = Piece
+        fields = ['title', 'description']
+
+
+class PieceView(LoginRequiredMixin, TemplateView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        piece = get_object_or_404(Piece, pk=kwargs['pk'], exhibition__admins=self.request.user)
+        context['piece'] = piece
+        context['base'] = "main_app/layout/base.html"
+        return context
+
+    def get_template_names(self):
+        return ['main_app/models/piece.html']
+
+
+class PieceCreateView(LoginRequiredMixin, CreateView):
+    model = Piece
+    form_class = PieceForm
+    template_name = 'main_app/models/piece_edit.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        self.exhibition = get_object_or_404(Exhibition, pk=kwargs['exhibition_id'], admins=request.user)
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        form.instance.exhibition = self.exhibition
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['exhibition'] = self.exhibition
+        return context
+
+    def get_success_url(self):
+        return reverse('main_app:exhibition-update', kwargs={'pk': self.exhibition.pk})
+
+
+class PieceUpdateView(LoginRequiredMixin, UpdateView):
+    model = Piece
+    form_class = PieceForm
+    template_name = 'main_app/models/piece_edit.html'
+
+    def get_queryset(self):
+        return Piece.objects.filter(exhibition__admins=self.request.user)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['exhibition'] = self.object.exhibition
+        return context
+
+    def get_success_url(self):
+        return reverse('main_app:exhibition-update', kwargs={'pk': self.object.exhibition.pk})
 
 
 ################ VIEWS for the Thing Model

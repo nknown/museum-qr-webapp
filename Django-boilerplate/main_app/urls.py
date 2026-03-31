@@ -44,6 +44,10 @@ urlpatterns = [
     path('exhibition/create', views.ExhibitionCreateView.as_view(), name='exhibition-create'),
     path('exhibition/<int:pk>', views.ExhibitionView.as_view(), name='exhibition'),
     path('exhibition/<int:pk>/update', views.ExhibitionUpdateView.as_view(), name='exhibition-update'),
+    path('exhibition/<int:pk>/add-pieces', views.ExhibitionAddPiecesView.as_view(), name='exhibition-add-pieces'),
+   path('piece/create/<int:exhibition_id>', views.PieceCreateView.as_view(), name='piece-create'),
+   path('piece/<int:pk>', views.PieceView.as_view(), name='piece'),
+   path('piece/<int:pk>/update', views.PieceUpdateView.as_view(), name='piece-update'),
 
 
 

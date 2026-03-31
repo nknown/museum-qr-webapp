@@ -15,11 +15,13 @@ from django.core.cache import cache
 
 from wagtail.models import Page
 from wagtail.fields import RichTextField
+from wagtail.admin.panels import FieldPanel, InlinePanel, MultiFieldPanel
+
 
 
 
 class Exhibition(models.Model):
-    name = models.CharField(max_length=255, blank=False, default='New Exhibition')
+    title = models.CharField(max_length=255, blank=False, default='New Exhibition')
     description = models.TextField(blank=False, default='Exhibition description')
 
     # Optional: keep if you really want explicit exposition managers
@@ -40,6 +42,39 @@ class Exhibition(models.Model):
     class Meta:
         verbose_name = "Exhibition"
         verbose_name_plural = "Exhibitions"
+
+class ExhibitionPage(Page):
+    description = RichTextField(blank=True)
+
+    parent_page_types = ["wagtailcore.Page"]
+#    subpage_types = ["main_app.PiecePage"]
+
+    content_panels = Page.content_panels + [
+        FieldPanel("description"),
+    ]
+
+
+class Piece(models.Model):
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    date_created = models.DateTimeField(auto_now_add=True)
+    # uma pecao so pertence a uma exhibiytion.
+    exhibition = models.ForeignKey(Exhibition, related_name='pieces', on_delete=models.CASCADE, null=True, blank=True)
+#   exhibitions = models.ManyToManyField(
+#        Exhibition,
+#        related_name='pieces',
+#        blank=True
+#    )
+
+    class Meta:
+        verbose_name = "Piece"
+        verbose_name_plural = "Pieces"
+
+    def __str__(self):
+        return self.title
+    
+
+
 
 
 

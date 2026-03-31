@@ -29,7 +29,7 @@ admin.site.register(Thing, ThingAdmin)
 class ExhibitionAdmin(SemanticModelAdmin):
     model = Exhibition
     menu_label = 'Exhibitions'  # ditch this to use verbose_name_plural from model
-    list_display = ['id', 'name', 'description']
+    list_display = ['id', 'title', 'description']
 
 admin.site.register(Exhibition, ExhibitionAdmin)
 

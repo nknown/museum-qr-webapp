@@ -1,17 +1,19 @@
 {% extends "main_app/layout/base.html" %}
 {% load static %}
 {% load i18n %}
-
+{% load render_table from django_tables2 %}
 
 
 {% block content %}
+
+
 
     <div class="right floated sixteen wide  column" id="content">
         <div class="ui centered grid">
             <div class="row">
                 <div class=" ui sixteen wide column">
                     <div class="ui header segment">
-                        <h2>{% if form.instance.pk %}{% trans "Edit Exposition" %}{% else %}{% trans "New Exposition" %}{% endif %}</h2>
+                        <h2>{% if form.instance.pk %}{% trans "Edit Exhibition" %}{% else %}{% trans "New Exhibition" %}{% endif %}</h2>
                     </div>
                 </div>
             </div>
@@ -23,13 +25,35 @@
                         <form class="ui form{% if errors %} error{% endif %}"  method="post">
                             {% csrf_token %}{{  form }}
 
+
+
+
+
                                 <div class="ui divider"></div>
                                 <button class="ui primary button" type="submit">Submit</button>
+
+                                
                                 
                         </form>
 
 
                     </div>
+                    {% if form.instance.pk %}
+                                <div class="row">
+                                    <div class="ui sixteen wide column">
+                                        <div class="ui segment">
+                                            <div class="ui clearing segment">
+                                                <h3 class="ui blue ribbon icon label">{% trans "list of your Pieces" %}</h3>
+                                                <a class="ui right floated button" href="{% url 'main_app:exhibition-add-pieces' form.instance.pk %}">
+                                                    {% trans "Add piece" %}
+                                                </a>
+                                            </div>
+                                            {% render_table pieces_table %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+
                 </div>
             </div>
         </div>

@@ -211,6 +211,11 @@ msgstr "Resultados"
 msgid "Student"
 msgstr "Estudante"
 
+
+#:Title of exhibition
+msgid "Title"
+msgstr "Título"
+
 #: free/models.py:157
 msgid "Teacher"
 msgstr "Professor"
@@ -411,6 +416,8 @@ msgstr "Exposições"
 
 #~ msgid "Name of execution:"
 #~ msgstr "Nome da execução:"
+
+
 
 #~ msgid "Initial Displacement (cm)"
 #~ msgstr "Deslocamento Inicial (cm)"
