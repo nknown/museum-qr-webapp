@@ -157,6 +157,17 @@ class PieceUpdateView(LoginRequiredMixin, UpdateView):
         return reverse('main_app:exhibition-update', kwargs={'pk': self.object.exhibition.pk})
 
 
+class PiecesOverviewView(LoginRequiredMixin, TemplateView):
+    template_name = 'main_app/models/pieces_overview.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        exhibitions = Exhibition.objects.prefetch_related('pieces').order_by('title')
+        context['exhibitions'] = exhibitions
+        context['base'] = "main_app/layout/base.html"
+        return context
+
+
 ################ VIEWS for the Thing Model
 #### create list of things
 # List1 - Create a Table

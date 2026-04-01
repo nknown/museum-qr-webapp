@@ -17,8 +17,9 @@ class IndexView(TemplateView):
     template_name='main_app/layout/index.html'
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["n_executions"] = len(Execution.objects.filter(status='F'))
-        context["n_users"] = len(User.objects.all())
+        context["n_exhibitions"] = Exhibition.objects.count()
+        context["n_pieces"] = Piece.objects.count()
+        context["n_users"] = User.objects.count()
         context["n_countries"] = len(Execution.objects.all().values_list('client_country').distinct())
         
         return context

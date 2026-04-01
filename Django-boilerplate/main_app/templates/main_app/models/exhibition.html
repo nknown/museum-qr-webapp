@@ -16,27 +16,6 @@
 
     <p>{{ exhibition.description }}</p>
 
-    <!--<div class="ui segment">
-        <h3>{% trans "Pieces" %}</h3>
-        <a href="{% url 'main_app:piece-create-from-expo' expo_pk=exhibition.pk %}"><button class='ui button'>{% trans 'Add piece' %}</button></a>
-        <table class="ui celled table">
-            <thead>
-                <tr><th>{% trans "Title" %}</th><th>{% trans "QR slug" %}</th><th></th></tr>
-            </thead>
-            <tbody>
-            {% for piece in pieces %}
-                <tr>
-                    <td>{{ piece.title }}</td>
-                    <td>{{ piece.qr_slug }}</td>
-                    <td><a href="{% url 'main_app:piece' piece.pk %}">{% trans "Show" %}</a></td>
-                </tr>
-            {% empty %}
-                <tr><td colspan="3">{% trans "No pieces yet." %}</td></tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </div> -->
-
 </div>
 
 {% endblock %}
