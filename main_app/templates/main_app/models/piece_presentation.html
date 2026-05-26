@@ -1,0 +1,211 @@
+{% extends "main_app/layout/base_presentation.html" %}
+{% load wagtailcore_tags wagtailimages_tags i18n %}
+
+{% block content %}
+<style>
+  .presentation-shell {
+    min-height: 100vh;
+    background: #65648b;
+    color: #000000;
+    padding: 2rem;
+  }
+
+  .presentation-frame {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .presentation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .presentation-title {
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    margin: 0;
+  }
+
+  .presentation-meta {
+    opacity: 0.75;
+    font-size: 0.95rem;
+  }
+
+  .presentation-stage {
+    position: relative;
+    min-height: calc(100vh - 10rem);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1rem;
+    overflow: hidden;
+    background: radial-gradient(circle at top, rgba(255, 255, 255, 0.06), transparent 60%), #ffffff;
+  }
+
+  .presentation-slide {
+    display: none;
+    padding: clamp(1.25rem, 3vw, 2.5rem);
+  }
+
+  .presentation-slide.is-active {
+    display: block;
+  }
+
+  .presentation-slide h2 {
+    margin-top: 0;
+  }
+
+  .presentation-slide img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 0.75rem;
+    margin: 1rem 0 0;
+  }
+
+  .presentation-overlay {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    pointer-events: none;
+  }
+
+  .presentation-overlay button {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    pointer-events: auto;
+    cursor: pointer;
+  }
+
+  .presentation-overlay button:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.85);
+    outline-offset: -2px;
+  }
+
+  .presentation-hint {
+    margin-top: 0.75rem;
+    opacity: 0.72;
+  }
+</style>
+
+<div class="presentation-shell" data-presentation-type="{{ presentation_type }}">
+  <div class="presentation-frame">
+    <div class="presentation-header">
+      <div>
+        <h1 class="presentation-title">{{ piece }}</h1>
+        <div class="presentation-meta">
+          {% if is_user_device_presentation %}
+            Click left for previous, right for next.
+          {% else %}
+            Auto-advancing based on page timer.
+          {% endif %}
+        </div>
+      </div>
+      <div class="presentation-meta">{{ presentation_pages|length }} pages</div>
+    </div>
+
+    <div class="presentation-stage" id="presentation-stage">
+      {% for slide in presentation_pages %}
+        <section class="presentation-slide{% if forloop.first %} is-active{% endif %}" data-slide-index="{{ forloop.counter0 }}" data-time-seconds="{{ slide.time_seconds|default:5 }}">
+          <h2>{{ slide.title }}</h2>
+          {% if slide.hero_image %}
+            {% image slide.hero_image fill-1200x675 as hero %}
+            <img src="{{ hero.url }}" alt="{{ slide.title }}">
+          {% endif %}
+          <div>{{ slide.body|richtext }}</div>
+        </section>
+      {% empty %}
+        <section class="presentation-slide is-active">
+          <h2>{% trans "No presentation pages yet." %}</h2>
+        </section>
+      {% endfor %}
+
+      {% if presentation_pages %}
+      <div class="presentation-overlay" aria-hidden="true">
+        <button type="button" data-direction="prev" aria-label="Previous slide"></button>
+        <button type="button" data-direction="next" aria-label="Next slide"></button>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const shell = document.querySelector('.presentation-shell');
+    const slides = Array.from(document.querySelectorAll('.presentation-slide'));
+    if (!shell || !slides.length) {
+      return;
+    }
+
+    let currentIndex = 0;
+    let timerId = null;
+    const isUserDevice = shell.dataset.presentationType === 'user_device';
+
+    function renderSlide(nextIndex) {
+      currentIndex = (nextIndex + slides.length) % slides.length;
+      slides.forEach((slide, index) => {
+        slide.classList.toggle('is-active', index === currentIndex);
+      });
+      if (!isUserDevice) {
+        scheduleAutoAdvance();
+      }
+    }
+
+    function scheduleAutoAdvance() {
+      if (timerId) {
+        window.clearTimeout(timerId);
+      }
+      const activeSlide = slides[currentIndex];
+      const timerSeconds = Number(activeSlide.dataset.timeSeconds || 5);
+      timerId = window.setTimeout(() => {
+        renderSlide(currentIndex + 1);
+      }, Math.max(timerSeconds, 1) * 1000);
+    }
+
+    function goNext() {
+      renderSlide(currentIndex + 1);
+    }
+
+    function goPrevious() {
+      renderSlide(currentIndex - 1);
+    }
+
+    if (isUserDevice) {
+      document.addEventListener('click', (event) => {
+        const bounds = shell.getBoundingClientRect();
+        const clickX = event.clientX - bounds.left;
+        if (clickX < bounds.width / 2) {
+          goPrevious();
+        } else {
+          goNext();
+        }
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'ArrowLeft') {
+          goPrevious();
+        }
+        if (event.key === 'ArrowRight') {
+          goNext();
+        }
+      });
+    } else {
+      scheduleAutoAdvance();
+    }
+
+    document.querySelectorAll('[data-direction]').forEach((button) => {
+      button.addEventListener('click', (event) => {
+        event.stopPropagation();
+        if (button.dataset.direction === 'prev') {
+          goPrevious();
+        } else {
+          goNext();
+        }
+      });
+    });
+  }());
+</script>
+{% endblock %}

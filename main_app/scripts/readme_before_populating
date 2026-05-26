@@ -1,0 +1,6 @@
+python manage.py shell
+
+from main_app.scripts.seed_museum import run
+run()
+
+

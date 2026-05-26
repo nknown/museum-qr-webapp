@@ -1,0 +1,16 @@
+{% load wagtailcore_tags wagtailimages_tags %}
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>{{ page.title }}</title>
+</head>
+<body>
+  <h1>{{ page.title }}</h1>
+  {% if page.hero_image %}
+    {% image page.hero_image fill-1200x500 as hero %}
+    <img src="{{ hero.url }}" alt="{{ page.title }}">
+  {% endif %}
+  <div>{{ page.body|richtext }}</div>
+</body>
+</html>

@@ -1,0 +1,40 @@
+{% extends 'main_app/layout/base.html' %}
+{% load static %}
+{% load django_tables2 %}
+{% load i18n %}
+
+{% block title %} {% trans 'List of Things' %} {% endblock %}
+
+{% block content %}
+    <div class="right floated sixteen wide  column" id="content">
+        <div class="ui centered grid">
+            <div class="row">
+                <div class=" ui sixteen wide column">
+                    <div class="ui header segment">
+                        <h2><i class="chart bar icon"></i>{% trans 'List of Things' %}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class=" ui sixteen wide column">
+                    <div class="ui header segment">
+                        <h2></i>{% trans 'Add a Thing' %} </h2>
+                        <a href="{% url 'main_app:thing-create' %}"><button class='ui button'>{% trans 'New'%}</button></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class=" ui sixteen wide column">
+                    <div class="ui segment">
+                        <div class="ui blue ribbon icon label">{% trans 'List of your Things' %}</div>
+                        <div class="ui divider"></div>
+
+                        {% render_table table %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

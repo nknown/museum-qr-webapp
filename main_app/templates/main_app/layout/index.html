@@ -1,0 +1,110 @@
+{% extends 'main_app/layout/base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %} Home page {% endblock %}
+
+{% block content %}
+
+{% if not user.is_authenticated %}
+
+<style>
+    body{
+        background-color:rgba(255,255, 245, 0.93);;
+    }
+    #page-grid {
+        background-image: url('/static/main_app/images/main_app-index-bg.png');
+        background-repeat: repeat;
+        background-size: cover;
+    }
+    .ui.sepia {
+        background-color:rgba(255,255, 245, 0.93);
+/*        background-color:rgba(255,250, 230, 0.90);*/
+
+    }
+    </style>
+{% endif %}
+        <!--content-->
+
+<div class=" ui white sixteen wide column" id="content">
+
+    <div class="ui centered grid">
+        <div class="ui row">
+            <div class="ui sixteen wide column  ">
+                <div class="ui header segment sepia">
+                    <div class="ui grid ">
+                        <div class="ui six wide middle aligned column ">
+                            <img   class="ui image  right floated "  src="/static/main_app/images/main_app_logo.png">
+                        </div>
+                        <div class="ui ten wide middle aligned column ">
+                            <div class="ui right floated ">
+                                <h1>Some Museum... </h1>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if not user.is_authenticated %}
+
+        <div class=" ui centered row">
+            <div class="eight wide computer twelve wide phone centered column">
+                <div class="ui padded segment sepia">
+                    <div class="ui grid">
+                        <div class="ui two columnn row">
+                            <div class="column">
+                                    <a  href="{% url 'main_app:login' %}">
+                                        <button class="ui  right floated teal labeled icon button">
+                                        LOG IN
+                                        <i class="signup icon"></i>
+                                        </button>
+                                    </a>
+                            </div>
+                            <div class="ui column">
+                                <img class="ui image" src="/static/main_app/images/arrow.png">
+                            </div>
+                        </div>
+                        <div class="ui left row">
+                            <div class="ui column">
+
+                            <p> If you want to execute some experiments or enter the world of remote laboratories....
+                            Log in
+                            </p>
+                            <h4>elab is open and is FREE!</h4>
+</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+
+
+        <div class="equal height row">
+            {% include 'main_app/index_project_description.html' %}
+        </div>
+
+
+
+        <div class="four column stackable row">
+
+            {% include 'main_app/index_statistics.html' %}
+
+        </div>
+
+
+
+
+
+
+
+
+        <div class="row">
+        </div>
+
+
+
+</div>
+{% endblock %}
