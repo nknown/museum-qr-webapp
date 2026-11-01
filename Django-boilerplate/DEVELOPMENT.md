@@ -53,7 +53,7 @@ python manage.py createsuperuser
 
 ### Configuration
 
-The application is configured with environment variables stored in the deployment environment in the `.env` file. Template for this file is in the `deploy\` directory. Fill in the individual configuration items, rename the file to `.env` and place it into the `freeweb\` directory.
+The application is configured with environment variables stored in a local `.env` file. Copy `.env.example` to `.env`, fill in local values, and never commit real credentials.
 
 ### Compilation of CSS & JavaScript bundles
 
@@ -137,4 +137,4 @@ python manage.py test free
 
 To develop code of individual react components, place them as source files into the `free/assets/src/components` folder. All those files will be bundled into `common` bundle by webpack. 
 
-It is recommended to use React hooks. To package a functional component for use in django templates, you need to prefix the function name with `/**/`. This is an annotation that the django loader system uses to distinguish internal functions and components. Class-based components should be recognised automatically. 
+It is recommended to use React hooks. To package a functional component for use in django templates, you need to prefix the function name with `/**/`. This is an annotation that the django loader system uses to distinguish internal functions and components. Class-based components should be recognised automatically.

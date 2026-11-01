@@ -27,10 +27,10 @@ You should now see a prefix of `(free-env)` in your command line. After that, in
 pip install -r REQUIREMENTS.txt
 ```
 
-The application is configured using environment variables. You can set them using the `/freeweb/.env` file. For your convenience, there is a `.env-template` file in the same folder, that you can rename to `.env` and alter the contents.
+The application is configured using environment variables in a local `.env` file. Copy the tracked, credential-free example and fill in your local values. Never commit `.env` or real credentials.
 
 ```
-mv freeweb/.env-template freeweb/.env
+cp .env.example .env
 ```
 
 **Available settings so far**
@@ -38,28 +38,23 @@ mv freeweb/.env-template freeweb/.env
 - `PROJECT_NAME`, `PROJECT_ACRONYMUM`, `SITE_NAME` - Texts that will appear in the page header
 - `TIME_ZONE` - Time zone setting for tha app in `Europe/Lisbon` format.
 
-- `FREE_PRODUCTION` - set to `on` to enable production mode (disables sensitive error messages etc.)
-- `FREE_REVERSE_PROXY` - set to `on` to be able to run the FREE behind a reverse proxy
-- `FREE_SECRET` - String used in hashing function. Set either to a random string of your choice, or generate one here: https://djecrety.ir 
-- `FREE_ALLOWED_HOSTS` - comma separated list of domain names/addresses; only requests to these hosts will be processed by the application. This is necessary to prevent HTTP Host header attacks. More info [here](https://docs.djangoproject.com/en/3.2/topics/security/#host-headers-virtual-hosting).
+- `MAIN_APP_PRODUCTION` - set to `on` to enable production mode (disables sensitive error messages etc.)
+- `MAIN_APP_REVERSE_PROXY` - set to `on` to run the application behind a reverse proxy
+- `MAIN_APP_SECRET` - a unique, random Django signing secret; never commit or reuse it
+- `MAIN_APP_ALLOWED_HOSTS` - comma-separated host names/addresses accepted by the application. This is necessary to prevent HTTP Host header attacks. More info [here](https://docs.djangoproject.com/en/3.2/topics/security/#host-headers-virtual-hosting).
 
 - `JANUS_SERVER_ADDRESS`, `JANUS_STREAM_KEY` - Configuration of Janus video streaming server.
 
 In future, this file will contain database configurations/passwords etc.
 
-Right now, the application release is shipped with pre-filled example database in `sqlite` format. 
+Do not commit or deploy a pre-filled database: it can contain password hashes,
+sessions, OAuth data, email addresses, and IP addresses. Create a fresh local
+database and a unique administrator account instead:
 
-Download the database and put it into the project root:
 ```
-wget https://github.com/e-lab-FREE/FREE_Web/releases/latest/download/db_template_0_6_0.sqlite3 -O db.sqlite3
+python manage.py migrate
+python manage.py createsuperuser
 ```
-
-This database contains a Pendulum experiment, as well as two example user accounts.
-
-- `wp-admin` - superuser account with access to admin interface
-- `wp-guest` - guest account
-
-Both have a password `temporary123`. This password can be changed through admin interface.
 
 Finally, run the application:
 ```
@@ -141,8 +136,8 @@ Follow the instructions in https://python-social-auth.readthedocs.io/en/latest/b
    - Create
 - Download json or save the Client ID and Client Secret
 - Edit .env file:
-   - activate ***FREE_GOOGLE_OAUTH***:
-      - `FREE_GOOGLE_OAUTH=true`
+   - activate ***MAIN_APP_GOOGLE_OAUTH***:
+      - `MAIN_APP_GOOGLE_OAUTH=true`
    - copy the value of ***Your Client ID*** to ***SOCIAL_AUTH_GOOGLE_OAUTH2_KEY***
    - copy ***Client Secret*** to ***SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET***
    - restart the FREE installation
@@ -167,8 +162,8 @@ Follow the instructions in https://python-social-auth.readthedocs.io/en/latest/b
     - this value should be put in the .env file
     :warning: **The secret Value dissapears after closing this page** :warning:
 - Edit .env file:
-   - activate ***FREE_MS_OAUTH***:
-      - FREE_MS_OAUTH=true
+   - activate ***MAIN_APP_MS_OAUTH***:
+      - MAIN_APP_MS_OAUTH=true
    - copy  the value of ***Application (client) ID*** to ***SSOCIAL_AUTH_MICROSOFT_GRAPH_KEY***
    - copy the value of ***Secret ID*** to ***SOCIAL_AUTH_MICROSOFT_GRAPH_SECRET***
    - restart the FREE installation
