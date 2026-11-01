@@ -1,0 +1,24 @@
+{% load wagtailimages_tags %}
+{% if presentation_appearance %}
+<style>
+.presentation-shell {--museum-colour:{{ presentation_appearance.colour }};--museum-ink:{{ presentation_appearance.ink }};background:var(--museum-colour);color:var(--museum-ink);}
+.presentation-shell .presentation-stage {isolation:isolate;background:var(--museum-colour);}
+.museum-background,.museum-overlay {position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
+.museum-background {object-fit:cover;filter:contrast(.45) saturate(.5);z-index:-2;}
+.museum-overlay {background:var(--museum-colour);opacity:{{ presentation_appearance.opacity }};z-index:-1;}
+.presentation-shell .mip-slide-body,
+.presentation-shell .mip-slide-copy,
+.presentation-shell .mip-default-slide > div,
+.presentation-shell .presentation-slide > h2,
+.presentation-shell .presentation-slide > p,
+.presentation-shell .presentation-slide > dl,
+.presentation-shell .presentation-slide > table,
+.presentation-shell .presentation-slide > div:not([class]) {background:var(--museum-colour);color:var(--museum-ink);padding:1rem;border-radius:.5rem;}
+.presentation-shell .mip-slide-body a,
+.presentation-shell .mip-slide-copy a,
+.presentation-shell .mip-default-slide > div a {color:inherit;text-decoration:underline;}
+.presentation-shell .mip-slide-copy .ui.header {color:inherit;}
+</style>
+{% if presentation_appearance.image %}{% image presentation_appearance.image width-1920 as texture %}<img class="museum-background" src="{{ texture.url }}" alt="" aria-hidden="true">{% endif %}
+<div class="museum-overlay" aria-hidden="true"></div>
+{% endif %}

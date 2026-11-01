@@ -1,7 +1,7 @@
 {% extends base %}
 {% load i18n %}
 
-{% block title %}{% trans 'Session statistics' %}{% endblock %}
+{% block title %}{% trans 'Details' %}: {{ history_label }}{% endblock %}
 
 {% block content %}
 <div class="ui sixteen wide column" id="content">
@@ -10,7 +10,7 @@
             <div class="ui sixteen wide column">
                 <div class="ui header segment">
                     <div class="ui clearing segment">
-                        <h2 class="ui left floated header"><i class="list alternate icon"></i>{% trans 'Session details' %}</h2>
+                        <h2 class="ui left floated header"><i class="list alternate icon"></i>{% trans 'Details' %}: {{ history_label }}</h2>
                     </div>
                 </div>
             </div>
@@ -19,26 +19,75 @@
         <div class="row">
             <div class="ui sixteen wide column">
                 <div class="ui segment">
-                    <p><strong>{% trans 'Session' %}:</strong> {{ presentation_session.session_key }}</p>
-                    <p><strong>{% trans 'User' %}:</strong> {{ presentation_session.display_user }}</p>
+                    <h3 class="ui header">{% trans 'Presentation summary' %}</h3>
                     <table class="ui celled table">
                         <thead>
                             <tr>
                                 <th>{% trans 'Presentation' %}</th>
-                                <th>{% trans 'Type' %}</th>
-                                <th>{% trans 'Accessed at' %}</th>
+                                <th>{% trans 'Last visited Slideshow page' %}</th>
+                                <th>{% trans 'Accesses' %}</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for access in accesses %}
                             <tr>
-                                <td>{{ access.presentation_title }}</td>
-                                <td>{{ access.get_presentation_type_display }}</td>
-                                <td>{{ access.accessed_at }}</td>
+                                <td>
+                                    <a href="{% url 'main_app:statistics-presentation' access.presentation_history_kind access.presentation_history_pk %}">
+                                        {{ access.presentation_title }}
+                                    </a>
+                                </td>
+                                <td>
+                                    {% if access.last_wagtail_page_title %}
+                                        {{ access.last_wagtail_page_title }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>{{ access.accesses }}</td>
                             </tr>
                             {% empty %}
                             <tr>
                                 <td colspan="3">{% trans 'No presentation accesses recorded.' %}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="ui sixteen wide column">
+                <div class="ui segment">
+                    <h3 class="ui header">{% trans 'User log' %}</h3>
+                    <table class="ui celled table">
+                        <thead>
+                            <tr>
+                                <th>{% trans 'Date of Access' %}</th>
+                                <th>{% trans 'Presentation' %}</th>
+                                <th>{% trans 'Last visited Slideshow page' %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for access in user_log %}
+                            <tr>
+                                <td>{{ access.last_accessed_at|date:"Y-m-d H:i" }}</td>
+                                <td>
+                                    <a href="{% url 'main_app:statistics-presentation' access.presentation_history_kind access.presentation_history_pk %}">
+                                        {{ access.presentation_title }}
+                                    </a>
+                                </td>
+                                <td>
+                                    {% if access.last_wagtail_page_title %}
+                                        {{ access.last_wagtail_page_title }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3">{% trans 'No user log entries found.' %}</td>
                             </tr>
                             {% endfor %}
                         </tbody>

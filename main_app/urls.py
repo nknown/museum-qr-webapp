@@ -5,6 +5,7 @@ from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from django.conf.urls.static import static
 from django.conf import settings
+from django.views.generic.base import RedirectView
 
 # Helper function to generate API documentation
 schema_view = get_schema_view(
@@ -30,6 +31,11 @@ urlpatterns = [
     re_path(r'^api/swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     re_path(r'^api/redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 
+    path('visit/history', views.VisitorHistoryView.as_view(), name='visitor-history'),
+
+    path('exhibition/<int:pk>/publication', views.PublicationView.as_view(), {'kind': 'exhibition'}, name='exhibition-publication'),
+    path('piece/<int:pk>/publication', views.PublicationView.as_view(), {'kind': 'piece'}, name='piece-publication'),
+
     # PAGES
     path('executions/configured', views.ExecutionsConfiguredListView.as_view(), name='executions-configured'),
     path('executions/finished', views.ExecutionsFinishedListView.as_view(), name='executions-finished'),
@@ -40,12 +46,18 @@ urlpatterns = [
     path('execution/create/<int:apparatus_id>/<int:protocol_id>/bare', views.CreateExecutionStrippedView.as_view(), name='stripped-execution-create'),
 
    # exhibition / piece hierarchy
+   path('museums', views.MuseumsListView.as_view(), name='museums-list'),
+   path('museum/create', views.MuseumCreateView.as_view(), name='museum-create'),
+   path('museum/<int:pk>/update', views.MuseumChangeView.as_view(), name='museum-update'),
+   path('museum/<int:pk>/change', RedirectView.as_view(pattern_name='main_app:museum-update', permanent=False), name='museum-change'),
+   path('museum/<int:pk>/delete', views.MuseumDeleteView.as_view(), name='museum-delete'),
    path('exhibitions', views.ExhibitionsListView.as_view(), name='exhibitions-list'),
     path('exhibition/create', views.ExhibitionCreateView.as_view(), name='exhibition-create'),
-    path('exhibition/<int:pk>', views.ExhibitionView.as_view(), name='exhibition'),
     path('exhibition/<int:pk>/update', views.ExhibitionUpdateView.as_view(), name='exhibition-update'),
+    path('exhibition/<int:pk>/user-device-qrs', views.ExhibitionUserDeviceQRCodesView.as_view(), name='exhibition-user-device-qrs'),
     path('exhibition/<int:pk>/delete', views.ExhibitionDeleteView.as_view(), name='exhibition-delete'),
    path('exhibition/<int:pk>/presentation/<slug:presentation_type>', views.ExhibitionPresentationView.as_view(), name='exhibition-presentation'),
+   path('presentation/exhibition/<uuid:public_id>', views.ExhibitionPresentationView.as_view(), name='exhibition-public-presentation'),
    path('exhibition/<int:pk>/attributes/create', views.ExhibitionAttributesCreateView.as_view(), name='exhibition-attributes-create'),
     path('exhibition/<int:pk>/add-pieces', views.ExhibitionAddPiecesView.as_view(), name='exhibition-add-pieces'),
    path('pieces', views.PiecesOverviewView.as_view(), name='pieces-overview'),
@@ -53,9 +65,14 @@ urlpatterns = [
    path('piece/create/<int:exhibition_id>', views.PieceCreateView.as_view(), name='piece-create-for-exhibition'),
    path('piece/<int:pk>', views.PieceView.as_view(), name='piece'),
    path('piece/<int:pk>/update', views.PieceUpdateView.as_view(), name='piece-update'),
+   path('piece/<int:pk>/delete', views.PieceDeleteView.as_view(), name='piece-delete'),
     path('piece/<int:pk>/presentation/<slug:presentation_type>', views.PiecePresentationView.as_view(), name='piece-presentation'),
+    path('presentation/piece/<uuid:public_id>', views.PiecePresentationView.as_view(), name='piece-public-presentation'),
+         path('presentation-access/<int:pk>/slide', views.PresentationAccessSlideUpdateView.as_view(), name='presentation-access-slide'),
+         path('presentation-favorites', views.PresentationFavoritesView.as_view(), name='presentation-favorites'),
       path('statistics', views.StatisticsView.as_view(), name='statistics'),
-      path('statistics/<int:pk>', views.StatisticsSessionView.as_view(), name='statistics-session'),
+         path('statistics/history/<str:history_type>/<int:pk>', views.StatisticsHistoryView.as_view(), name='statistics-history'),
+         path('statistics/presentation/<str:presentation_type>/<int:pk>', views.StatisticsPresentationView.as_view(), name='statistics-presentation'),
     
 
    # path('things', views.ThingsListView.as_view(), name='things-list'),

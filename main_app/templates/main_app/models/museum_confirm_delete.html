@@ -1,0 +1,31 @@
+{% extends 'main_app/layout/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans 'Confirm Remove Museum' %}{% endblock %}
+
+{% block content %}
+<div class="ui container" style="margin-top: 2rem;">
+    <div class="ui centered grid">
+        <div class="row">
+            <div class="ui sixteen wide column">
+                <div class="ui warning message">
+                    <div class="header">{% trans 'Remove Museum' %}</div>
+                    <p>{% trans 'Are you sure you want to remove this museum?' %}</p>
+                    <p><strong>{{ object.title }}</strong></p>
+                    <p>{% trans 'The exhibitions assigned to this museum will not be deleted.' %}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="ui sixteen wide column">
+                <form method="post">
+                    {% csrf_token %}
+                    <a href="{% url 'main_app:museums-list' %}" class="ui button">{% trans 'Cancel' %}</a>
+                    <button type="submit" class="ui red button">{% trans 'Remove Museum' %}</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

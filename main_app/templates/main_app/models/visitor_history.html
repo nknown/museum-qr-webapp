@@ -1,0 +1,22 @@
+{% extends 'main_app/layout/base.html' %}
+{% load i18n %}
+{% block content %}
+<div class="ui sixteen wide column">
+  <h1>{% trans 'My visit' %}</h1>
+  {% for museum in visitor_history.museums.values %}
+    <section class="ui segment">
+      <h2>{{ museum.title }}</h2>
+      {% for exhibition in museum.exhibitions.values %}
+        <h3><a href="{{ exhibition.path }}">{{ exhibition.title }}</a></h3>
+        <ul>
+        {% for piece in exhibition.pieces.values %}
+          {% if piece.visited %}<li><a href="{{ piece.path }}">{{ piece.title }}</a></li>{% endif %}
+        {% endfor %}
+        </ul>
+      {% endfor %}
+    </section>
+  {% empty %}
+    <p>{% trans 'Scan a presentation QR code to start your visit. Your viewed pieces will appear here.' %}</p>
+  {% endfor %}
+</div>
+{% endblock %}

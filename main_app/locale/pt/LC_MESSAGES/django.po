@@ -341,8 +341,8 @@ msgid "Elab"
 msgstr "Elab"
 
 #: free/templates/free/login.html:65
-msgid "Log-in to FREE"
-msgstr "Entrar no FREE"
+msgid "Log in to MIYP"
+msgstr "Entrar no MIYP"
 
 #: free/templates/free/login.html:71
 msgid "Username"

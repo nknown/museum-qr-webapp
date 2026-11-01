@@ -1,0 +1,66 @@
+{% extends base %}
+{% load i18n %}
+
+{% block title %}{% trans "Edit Museum" %}{% endblock %}
+
+{% block content %}
+<div class="ui sixteen wide column" id="content">
+    <div class="ui centered grid">
+        <div class="row">
+            <div class="ui sixteen wide column">
+                <div class="ui header segment">
+                    <div class="ui clearing segment">
+                        <h2 class="ui left floated header"><i class="building icon"></i>{% trans "Edit Museum" %}: {{ museum.title }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="ui sixteen wide column">
+                <div class="ui segment">
+                    <form class="ui form" method="post">
+                        {% csrf_token %}
+                        {{ form }}
+                        <div class="ui divider"></div>
+                        <table class="ui celled table">
+                            <thead>
+                                <tr>
+                                    <th>{% trans "Add" %}</th>
+                                    <th>{% trans "Exhibition" %}</th>
+                                    <th>{% trans "Current Museum" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in exhibition_rows %}
+                                <tr>
+                                    <td>
+                                        <div class="ui checkbox">
+                                            <input type="checkbox" name="exhibitions" value="{{ row.exhibition.pk }}"{% if row.checked %} checked{% endif %}>
+                                            <label></label>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'main_app:exhibition-update' row.exhibition.pk %}">
+                                            {{ row.exhibition.title }}
+                                        </a>
+                                    </td>
+                                    <td>{{ row.current_museum.title|default:"-" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3">{% trans "No exhibitions available." %}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        <button class="ui primary button" type="submit">{% trans "Submit" %}</button>
+                        <a class="ui button" href="{% url 'main_app:museums-list' %}">{% trans "Back" %}</a>
+                        <a class="ui negative button" href="{% url 'main_app:museum-delete' museum.pk %}">{% trans "Remove" %}</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

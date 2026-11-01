@@ -4,12 +4,26 @@
 
 {% block content %}
 
+
+<style>
+    .presentation-button-column {
+        display: flex;
+        flex-direction: column;
+        gap: 0.85rem;
+    }
+
+    .presentation-button-column .ui.button {
+        margin: 0;
+        width: 100%;
+    }
+</style>
+
     <div class="right floated sixteen wide  column" id="content">
         <div class="ui centered grid">
             <div class="row">
                 <div class="ui sixteen wide column">
                     <div class="ui header segment">
-                        <h2>{% if form.instance.pk %}{% trans "Edit Piece" %}{% else %}{% trans "New Piece" %}{% endif %}</h2>
+                        <h2>{% if piece.pk %}{{ piece }}{% else %}{% trans "New Piece" %}{% endif %}</h2>
                         {% if exhibition %}
                             <p>{% trans "Exhibition" %}: {{ exhibition.title }}</p>
                         {% endif %}
@@ -20,41 +34,72 @@
             <div class="row">
                 <div class="ui sixteen wide column">
                     <div class="ui segment">
-                        <form class="ui form{% if errors %} error{% endif %}" method="post">
+                        <form class="ui form{% if errors %} error{% endif %}" method="post" enctype="multipart/form-data">
                             {% csrf_token %}{{ form }}
+
+                            {% if current_piece_image_url %}
+                                <div class="ui divider"></div>
+                                <div class="field">
+                                    <label>{% trans "Current piece image" %}</label>
+                                    <img src="{{ current_piece_image_url }}" alt="{{ piece }}" style="max-width: 240px; max-height: 240px; object-fit: contain;">
+                                </div>
+                            {% endif %}
 
                             <div class="ui divider"></div>
                             <button class="ui primary button" type="submit">{% trans "Submit" %}</button>
                             {% if exhibition %}
                                 <a class="ui button" href="{% url 'main_app:exhibition-update' exhibition.pk %}">{% trans "Back" %}</a>
                             {% endif %}
+                            {% if piece.pk %}
+                                <button
+                                    class="ui negative button"
+                                    type="submit"
+                                    form="piece-delete-form"
+                                    onclick="return confirm('{% trans "Remove this piece and its presentations?" %}');"
+                                >
+                                    {% trans "Remove" %}
+                                </button>
+                            {% endif %}
                         </form>
+                        {% if piece.pk %}
+                            <form id="piece-delete-form" method="post" action="{% url 'main_app:piece-delete' piece.pk %}" style="display: none;">
+                                {% csrf_token %}
+                            </form>
+                        {% endif %}
                     </div>
 
                     {% if piece.pk %}
                     <div class="ui segment">
                         <h4>{% trans "Presentations" %}</h4>
-                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-                            {% if piece_presentations.on_site %}
-                            <a class="ui button" href="{{ piece_presentations.on_site }}">{% trans "Edit Onsite Presentation" %}</a>
-                            {% else %}
-                            <button class="ui button" disabled>{% trans "Edit Onsite Presentation" %}</button>
-                            {% endif %}
-                            {% if piece_presentations.user_device %}
-                            <a class="ui button" href="{{ piece_presentations.user_device }}">{% trans "Edit User Device Presentation" %}</a>
-                            {% else %}
-                            <button class="ui button" disabled>{% trans "Edit User Device Presentation" %}</button>
-                            {% endif %}
-                            {% if piece_presentations.on_site %}
-                            <a class="ui button" href="{% url 'main_app:piece-presentation' piece.pk 'on_site' %}">{% trans "View Onsite Presentation" %}</a>
-                            {% else %}
-                            <button class="ui button" disabled>{% trans "View Onsite Presentation" %}</button>
-                            {% endif %}
-                            {% if piece_presentations.user_device %}
-                            <a class="ui button" href="{% url 'main_app:piece-presentation' piece.pk 'user_device' %}">{% trans "View User Device Presentation" %}</a>
-                            {% else %}
-                            <button class="ui button" disabled>{% trans "View User Device Presentation" %}</button>
-                            {% endif %}
+                        <div class="ui two column stackable grid">
+                            <div class="column">
+                                <div class="presentation-button-column">
+                                    {% if piece_presentations.on_site %}
+                                    <a class="ui button" href="{{ piece_presentations.on_site }}">{% trans "Edit Onsite Presentation" %}</a>
+                                    {% else %}
+                                    <button class="ui button" disabled>{% trans "Edit Onsite Presentation" %}</button>
+                                    {% endif %}
+                                    {% if piece_presentations.on_site %}
+                                    <a class="ui button" href="{% url 'main_app:piece-presentation' piece.pk 'on_site' %}">{% trans "View Onsite Presentation" %}</a>
+                                    {% else %}
+                                    <button class="ui button" disabled>{% trans "View Onsite Presentation" %}</button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="column">
+                                <div class="presentation-button-column">
+                                    {% if piece_presentations.user_device %}
+                                    <a class="ui button" href="{{ piece_presentations.user_device }}">{% trans "Edit User Device Presentation" %}</a>
+                                    {% else %}
+                                    <button class="ui button" disabled>{% trans "Edit User Device Presentation" %}</button>
+                                    {% endif %}
+                                    {% if piece_presentations.user_device %}
+                                    <a class="ui button" href="{% url 'main_app:piece-public-presentation' piece.public_id %}">{% trans "View User Device Presentation" %}</a>
+                                    {% else %}
+                                    <button class="ui button" disabled>{% trans "View User Device Presentation" %}</button>
+                                    {% endif %}
+                                </div>
+                            </div>
                         </div>
                     </div>
                     {% endif %}

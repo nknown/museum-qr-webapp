@@ -24,22 +24,21 @@
                             <tr>
                                 <th>{% trans "Exhibition" %}</th>
                                 <th>{% trans "Number of pieces" %}</th>
-                                <th>{% trans "Actions" %}</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for card in exhibition_cards %}
                             <tr>
-                                <td>{{ card.exhibition.title }}</td>
-                                <td>{{ card.piece_count }}</td>
                                 <td>
-                                    <a href="{% url 'main_app:exhibition-update' card.exhibition.pk %}"><button class='ui button'>{% trans 'Edit' %}</button></a>
-                                    <a href="{% url 'main_app:exhibition-delete' card.exhibition.pk %}"><button class='ui negative button'>{% trans 'Remove' %}</button></a>
+                                    <a href="{% url 'main_app:exhibition-update' card.exhibition.pk %}">
+                                        {{ card.exhibition.title }}
+                                    </a>
                                 </td>
+                                <td>{{ card.piece_count }}</td>
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="3">{% trans "No exhibitions found." %}</td>
+                                <td colspan="2">{% trans "No exhibitions found." %}</td>
                             </tr>
                             {% endfor %}
                         </tbody>

@@ -1,0 +1,214 @@
+{% extends "wagtailadmin/base.html" %}
+{% load i18n wagtailadmin_tags %}
+
+{% block titletag %}{% trans "Templates" %}{% endblock %}
+
+{% block extra_css %}
+    {{ block.super }}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fomantic-ui@2.9.3/dist/semantic.min.css">
+{% endblock %}
+
+{% block content %}
+    {% include "wagtailadmin/shared/header.html" with title=_("Templates") icon="form" %}
+
+    <div class="nice-padding">
+        <style>
+            .template-preview {
+                margin-bottom: 2rem;
+            }
+
+            .template-preview .ui.segment {
+                max-width: 960px;
+            }
+
+            .template-screen {
+                background: #fff;
+                border: 1px solid rgba(34, 36, 38, 0.15);
+                overflow: hidden;
+                padding: 1rem;
+                width: min(100%, 900px);
+            }
+
+            .template-screen-widescreen {
+                aspect-ratio: 16 / 9;
+            }
+
+            .template-screen-standard {
+                aspect-ratio: 4 / 3;
+                max-width: 720px;
+            }
+
+            .template-square-media,
+            .template-quarter-media {
+                background: #f3f4f5;
+                border: 1px solid rgba(34, 36, 38, 0.15);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: rgba(0, 0, 0, 0.55);
+                font-weight: 700;
+                overflow: hidden;
+            }
+
+            .template-square-media {
+                aspect-ratio: 1 / 1;
+                width: min(100%, 420px);
+                margin: 0 auto;
+            }
+
+            .template-quarter-media {
+                aspect-ratio: 1 / 1;
+                width: 100%;
+            }
+
+            .template-copy {
+                line-height: 1.55;
+            }
+
+            .template-screen-widescreen .template-square-media {
+                width: 100%;
+                margin: 0;
+            }
+
+            .template-screen-standard .template-quarter-media {
+                margin-bottom: 0.75rem;
+            }
+
+            .template-fill {
+                height: 100%;
+            }
+
+            .template-assignment {
+                max-width: 960px;
+                margin-bottom: 2rem;
+            }
+
+            .template-assignment table {
+                margin-top: 1rem;
+            }
+        </style>
+
+        <div class="template-assignment">
+            <h2>{% trans "Apply Templates" %}</h2>
+            <div class="ui segment">
+                <form class="ui form" method="post">
+                    {% csrf_token %}
+                    <p>Choose an exhibition and load its saved layouts before editing. Every piece in the exhibition inherits these layouts.</p>
+                    <div class="field">
+                        <label for="template-exhibition">{% trans "Exhibition" %}</label>
+                        <select id="template-exhibition" name="target" required>
+                            {% for key, label in targets %}
+                                <option value="{{ key }}" {% if key == selected %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button class="ui button" type="submit" formmethod="get">Load settings</button>
+                    {{ form.errors }}
+                    <div class="two fields">
+                        <div class="field">
+                            <label for="on-site-template">{% trans "On Site Template" %}</label>
+                            <select id="on-site-template" name="on_site_template">
+                                {% for template_id, label in form.on_site_template.field.choices %}
+                                    <option value="{{ template_id }}" {% if template_id == form.on_site_template.value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="user-device-template">{% trans "User Device Template" %}</label>
+                            <select id="user-device-template" name="user_device_template">
+                                {% for template_id, label in form.user_device_template.field.choices %}
+                                    <option value="{{ template_id }}" {% if template_id == form.user_device_template.value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <button class="ui primary button" type="submit">{% trans "Apply to Exhibition" %}</button>
+                </form>
+
+                <table class="ui celled table">
+                    <thead>
+                        <tr>
+                            <th>{% trans "Exhibition" %}</th>
+                            <th>{% trans "On Site" %}</th>
+                            <th>{% trans "User Device" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in assignment_rows %}
+                            <tr>
+                                <td>{{ row.title }}<br><small>{{ row.kind }}{% if row.museum %} · {{ row.museum }}{% endif %}</small></td>
+                                {% for layout in row.layouts %}
+                                <td><span class="ui {% if layout.enabled %}green {% endif %}label">{{ layout.label }}</span>{% if layout.enabled %}<br><small>{{ layout.source }}</small>{% endif %}</td>
+                                {% endfor %}
+                            </tr>
+                        {% empty %}<tr><td colspan="3">No museums or exhibitions available.</td></tr>{% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="template-preview">
+            <h2>{% trans "Handheld Device" %}</h2>
+            <div class="ui segment">
+                <div class="ui centered grid">
+                    <div class="ten wide computer fourteen wide tablet sixteen wide mobile column">
+                        <div class="template-square-media">{% trans "Image or video square" %}</div>
+                    </div>
+                    <div class="ten wide computer fourteen wide tablet sixteen wide mobile column">
+                        <h3 class="ui header">{% trans "Slide title" %}</h3>
+                        <div class="template-copy">
+                            {% trans "Text appears below the square media block for handheld viewing." %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="template-preview">
+            <h2>{% trans "On Site 16:9 Widescreen" %}</h2>
+            <div class="ui segment">
+                <div class="template-screen template-screen-widescreen">
+                    <div class="ui grid template-fill">
+                        <div class="eight wide column">
+                            <div class="template-square-media">{% trans "Image or video" %}</div>
+                        </div>
+                        <div class="eight wide column">
+                            <h3 class="ui header">{% trans "Text" %}</h3>
+                            <div class="template-copy">
+                                {% trans "The remaining widescreen space is reserved for the slide text." %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="template-preview">
+            <h2>{% trans "On Site 4:3 Standard / Square" %}</h2>
+            <div class="ui segment">
+                <div class="template-screen template-screen-standard">
+                    <div class="ui grid template-fill">
+                        <div class="four wide column">
+                            <div class="template-quarter-media">{% trans "Image or video" %}</div>
+                            <div class="template-copy">
+                                {% trans "Text column below media." %}
+                            </div>
+                        </div>
+                        <div class="twelve wide column">
+                            <div class="ui two column grid">
+                                <div class="column">
+                                    <h3 class="ui header">{% trans "Text column 1" %}</h3>
+                                    <p>{% trans "Primary description, labels, or object interpretation." %}</p>
+                                </div>
+                                <div class="column">
+                                    <h3 class="ui header">{% trans "Text column 2" %}</h3>
+                                    <p>{% trans "Additional context, notes, or metadata." %}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

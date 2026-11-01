@@ -1,1 +1,0 @@
-This directory should contain the certificates produced by the network administrator or self signed in this host.
