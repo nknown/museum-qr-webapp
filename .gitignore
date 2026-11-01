@@ -58,7 +58,19 @@ cover/
 # Django stuff:
 *.log
 local_settings.py
-db.sqlite3-journal
+# Local databases and their backups can contain accounts, sessions, OAuth data,
+# email addresses, and IP addresses. Never commit them.
+*.sqlite
+*.sqlite-*
+*.sqlite.*
+*.sqlite3
+*.sqlite3-*
+*.sqlite3.*
+*.db
+*.db-*
+*.db.*
+media/
+staticfiles/
 
 # Flask stuff:
 instance/
@@ -135,6 +147,11 @@ celerybeat.pid
 
 # Environments
 .env
+.env.*
+.env-*
+!.env.example
+!.env.*.example
+!.env-*.example
 .envrc
 .venv
 env/
@@ -142,6 +159,30 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+
+# Deployment-specific environment files kept under Django's project folder.
+**/root_files/env-*
+!**/root_files/env-*.example
+
+# Private keys, credential exports, and secret stores.
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+credentials*.json
+client_secret*.json
+service-account*.json
+service_account*.json
+!credentials*.example.json
+!client_secret*.example.json
+!service-account*.example.json
+!service_account*.example.json
+.secrets/
+secrets/
+*.dump
+*.backup
 
 # Spyder project settings
 .spyderproject
