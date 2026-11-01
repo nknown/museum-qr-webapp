@@ -1,0 +1,26 @@
+{% load wagtailcore_tags wagtailimages_tags i18n %}
+
+<div class="ui grid mip-on-site-template mip-on-site-widescreen-template">
+  <div class="eight wide column">
+    <div class="mip-on-site-media mip-on-site-media-widescreen" data-media-slot>
+      {% if slide.hero_image %}
+        {% image slide.hero_image fill-900x900 as hero %}
+        <img src="{{ hero.url }}" alt="{{ slide.title }}">
+      {% else %}
+        {% for item in slide.gallery_images.all %}
+          {% if forloop.first %}
+            {% image item.image fill-900x900 as gallery_image %}
+            <img src="{{ gallery_image.url }}" alt="{{ item.caption|default:slide.title }}">
+          {% endif %}
+        {% empty %}
+          <div class="mip-empty-media">{% trans "No media" %}</div>
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+  <div class="eight wide column">
+    <div class="mip-slide-copy" data-slide-richtext>
+      {{ slide.body|richtext }}{% include_block slide.content %}
+    </div>
+  </div>
+</div>

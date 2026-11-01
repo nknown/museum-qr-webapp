@@ -16,15 +16,14 @@
         <div class="ui top pointing dropdown admindropdown link item right">
             <img class="improfile" src="{% static 'main_app/images/eu.png' %}" alt="">
             {% if user.is_authenticated %}
-                <span class="clear navtext"><strong>{% trans 'Hi'%}, {{ user }}</strong></span>
+                <span class="clear navtext"><strong>{% trans 'Hi'%}, {{ user.first_name|default:user.username }}</strong></span>
             {% endif %}
             <i class="dropdown icon navtext"></i>
             <div class="menu">
-                {% if user.is_staff %}
+                {% if is_platform_admin %}
                     <a href="{% url 'admin:index' %}" class="item"><p><i class="settings icon"></i>{% trans 'Administration'%}</p></a>
                 {% endif %}
-                <a href="{% url 'main_app:logout' %}" class="item"><i class="sign out alternate icon"></i> {% trans 'Logout'%}</a>
-                    {% include "main_app/layout/logout-button.html" %}
+                {% include "main_app/layout/logout-button.html" %}
         </div>
         </div>
     </div>
@@ -53,7 +52,7 @@
         <div class="right menu">
    -->
             <div class="item">
-                <strong class="navtext">{% trans 'Elab' %}</strong>
+                <strong class="navtext">MIYP</strong>
                 
             </div>
             <div class="item">
@@ -63,14 +62,13 @@
             <div class="ui top pointing dropdown admindropdown link item right">
                 <img class="improfile" src="{% static 'main_app/images/eu.png' %}" alt="">
                 {% if user.is_authenticated %}
-                    <span class="clear navtext"><strong>{% trans 'Hi'%}, {{ user }}</strong></span>
+                    <span class="clear navtext"><strong>{% trans 'Hi'%}, {{ user.first_name|default:user.username }}</strong></span>
                 {% endif %}
                 <i class="dropdown icon navtext"></i>
                 <div class="menu">
-                    {% if user.is_staff %}
+                    {% if is_platform_admin %}
                         <a href="{% url 'admin:index' %}" class="item"><p><i class="settings icon"></i>{% trans 'Administration'%}</p></a>
                     {% endif %}
-                    <a href="{% url 'main_app:logout' %}" class="item"><i class="sign out alternate icon"></i> {% trans 'Logout'%}</a>
                     {% include "main_app/layout/logout-button.html" %}
                 </div>
             </div>

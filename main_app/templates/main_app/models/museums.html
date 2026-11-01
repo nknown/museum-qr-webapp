@@ -1,0 +1,52 @@
+{% extends base %}
+{% load i18n %}
+
+{% block title %}{% trans "Museums" %}{% endblock %}
+
+{% block content %}
+<div class="ui sixteen wide column" id="content">
+    <div class="ui centered grid">
+        <div class="row">
+            <div class="ui sixteen wide column">
+                <div class="ui header segment">
+                    <div class="ui clearing segment">
+                        <h2 class="ui left floated header"><i class="building icon"></i>{% trans "Museums" %}</h2>
+                        {% if is_platform_admin %}<a class="ui right floated primary button" href="{% url 'main_app:museum-create' %}">{% trans "New Museum" %}</a>{% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="ui sixteen wide column">
+                <div class="ui segment">
+                    <table class="ui celled table">
+                        <thead>
+                            <tr>
+                                <th>{% trans "Museum" %}</th>
+                                <th>{% trans "Number of Exhibitions" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for card in museum_cards %}
+                            <tr>
+                                <td>
+                                    {% if is_platform_admin %}<a href="{% url 'main_app:museum-update' card.museum.pk %}">{% endif %}
+                                        {{ card.museum.title }}
+                                    {% if is_platform_admin %}</a>{% endif %}
+                                </td>
+                                <td>{{ card.exhibition_count }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="2">{% trans "No museums found." %}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

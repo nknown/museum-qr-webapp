@@ -1,0 +1,16 @@
+{% if auth_notyf %}
+{{ auth_notyf|json_script:"auth-notyf-data" }}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const notification = JSON.parse(
+      document.getElementById('auth-notyf-data').textContent
+    );
+    const notyf = new Notyf({
+      duration: 3000,
+      dismissible: false,
+      position: { x: 'right', y: 'top' }
+    });
+    notyf.open(notification);
+  });
+</script>
+{% endif %}

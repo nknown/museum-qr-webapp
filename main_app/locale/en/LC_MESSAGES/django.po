@@ -351,7 +351,7 @@ msgid "Administration"
 msgstr ""
 
 #: templates/free/login.html:51
-msgid "Log-in to FREE"
+msgid "Log in to MIYP"
 msgstr ""
 
 #: templates/free/login.html:61

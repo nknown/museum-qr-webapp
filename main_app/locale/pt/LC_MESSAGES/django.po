@@ -211,6 +211,11 @@ msgstr "Resultados"
 msgid "Student"
 msgstr "Estudante"
 
+
+#:Title of exhibition
+msgid "Title"
+msgstr "Título"
+
 #: free/models.py:157
 msgid "Teacher"
 msgstr "Professor"
@@ -258,6 +263,10 @@ msgstr "Lista das suas execuções"
 #: free/templates/free/experiment.html:148
 msgid "Configuration data"
 msgstr "Dados de configuração"
+
+
+
+
 
 #: free/templates/free/experiment.html:153
 #, fuzzy
@@ -332,8 +341,8 @@ msgid "Elab"
 msgstr "Elab"
 
 #: free/templates/free/login.html:65
-msgid "Log-in to FREE"
-msgstr "Entrar no FREE"
+msgid "Log in to MIYP"
+msgstr "Entrar no MIYP"
 
 #: free/templates/free/login.html:71
 msgid "Username"
@@ -395,6 +404,10 @@ msgstr "Atribuir Stream"
 msgid "Current status"
 msgstr "Estado actual"
 
+#: main_app/templates/main_app/menus.html:12
+msgid "Exhibitions"
+msgstr "Exposições"
+
 #~ msgid " Apparatus: "
 #~ msgstr " Aparato: "
 
@@ -403,6 +416,8 @@ msgstr "Estado actual"
 
 #~ msgid "Name of execution:"
 #~ msgstr "Nome da execução:"
+
+
 
 #~ msgid "Initial Displacement (cm)"
 #~ msgstr "Deslocamento Inicial (cm)"

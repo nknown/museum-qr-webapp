@@ -1,4 +1,12 @@
 from django.apps import AppConfig
+from django.db.models.signals import post_migrate
+
+
+def provision_roles(sender, **kwargs):
+    from main_app.models import UserProfile
+    from main_app.role_permissions import sync_user_access
+    for profile in UserProfile.objects.select_related('user'):
+        sync_user_access(profile)
 
 
 class FreeConfig(AppConfig):
@@ -6,10 +14,4 @@ class FreeConfig(AppConfig):
     name = 'main_app'
 
     def ready(self):
-        # unregister models that may have been added later (e.g. by third-party apps)
-        from django.contrib import admin
-        from django_summernote.models import Attachment
-        try:
-            admin.site.unregister(Attachment)
-        except admin.sites.NotRegistered:
-            pass
+        post_migrate.connect(provision_roles, sender=self, dispatch_uid='main_app.provision_roles')

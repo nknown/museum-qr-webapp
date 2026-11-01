@@ -1,0 +1,79 @@
+{% load wagtailcore_tags wagtailimages_tags i18n static %}
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>MIYP | {{ page.title }}</title>
+  <link rel="shortcut icon" href="{% static 'wagtailadmin/images/favicon.ico' %}">
+</head>
+<body>
+  <!-- Display piece data if available -->
+  {% if piece %}
+    <h1><i class="cube icon"></i>{{ piece_name }}</h1>
+    <table class="ui celled table">
+      <tbody>
+        <tr>
+          <td>{% trans "Date created" %}</td>
+          <td>{{ piece.date_created }}</td>
+        </tr>
+        <tr>
+          <td>{% trans "Exhibition" %}</td>
+          <td>{{ piece.exhibition.title }}</td>
+        </tr>
+        {% for name, value in attribute_rows %}
+        <tr>
+          <td>{{ name }}</td>
+          <td>{{ value }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% if page.body %}
+      <div style="margin-top: 2rem;">
+        {{ page.body|richtext }}
+      </div>
+    {% endif %}
+
+  <!-- Display exhibition data if available -->
+  {% elif exhibition %}
+    <h1><i class="columns icon"></i>{{ exhibition.title }}</h1>
+    <div>
+      <h3>{% trans "Description" %}</h3>
+      <p>{{ exhibition.description }}</p>
+    </div>
+    {% if visible_pieces %}
+      <div>
+        <h3>{% trans "Pieces" %}</h3>
+        <ul>
+          {% for piece in visible_pieces %}
+            <li>{{ piece }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+    {% if page.body %}
+      <div style="margin-top: 2rem;">
+        {{ page.body|richtext }}
+      </div>
+    {% endif %}
+
+  <!-- Fallback: show title, body, and gallery -->
+  {% else %}
+    <h1>{{ page.title }}</h1>
+    <div>{{ page.body|richtext }}</div>
+  {% endif %}
+
+  {% if page.gallery_images.all %}
+    <section>
+      {% for item in page.gallery_images.all %}
+        {% image item.image width-1200 as img %}
+        <figure>
+          <img src="{{ img.url }}" alt="{{ item.caption|default:page.title }}">
+          {% if item.caption %}<figcaption>{{ item.caption }}</figcaption>{% endif %}
+        </figure>
+      {% endfor %}
+    </section>
+  {% endif %}
+{% include_block page.content %}
+</body>
+</html>

@@ -1,2 +1,8 @@
+pyenv install 3.11
+~/.pyenv/versions/3.11.11/bin/python3.11 -m venv venv
+source venv/bin/activate
+
+
 sudo apt install spatialite-bin
 sudo apt install libsqlite3-mod-spatialite
+sudo apt-get install binutils libproj-dev gdal-bin

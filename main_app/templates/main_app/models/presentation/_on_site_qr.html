@@ -1,0 +1,7 @@
+{% load i18n %}
+
+{% if user_device_presentation_qr_svg %}
+<a class="on-site-user-device-qr" href="{{ user_device_presentation_url }}" target="_blank" rel="noopener">
+  <span class="on-site-user-device-qr__code">{{ user_device_presentation_qr_svg|safe }}</span>
+</a>
+{% endif %}

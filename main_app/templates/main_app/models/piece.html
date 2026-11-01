@@ -3,35 +3,39 @@
 {% load i18n %}
 
 {% block content %}
-<h2>{{ piece.title }}</h2>
-
-<div class="ui sixteen wide  column"  id="content">
-    <div class ="ui centered grid">
+<div class="ui sixteen wide column" id="content">
+    <div class="ui centered grid">
         <div class="row">
-            <div class=" ui sixteen wide column">
+            <div class="ui sixteen wide column">
                 <div class="ui header segment">
-                    <h2> <i class="cube icon"></i>{{ piece.title }}</h2>
+                    <h2><i class="cube icon"></i>{{ piece_name }}</h2>
                 </div>
             </div>
         </div>
     </div>
 
-    <p>{{ piece.description }}</p>
+    <table class="ui celled table">
+        <tbody>
+            <tr>
+                <td>{% trans "Date created" %}</td>
+                <td>{{ piece.date_created }}</td>
+            </tr>
+            <tr>
+                <td>{% trans "Exhibition" %}</td>
+                <td>{{ piece.exhibition.title }}</td>
+            </tr>
+            {% for name, value in attribute_rows %}
+            <tr>
+                <td>{{ name }}</td>
+                <td>{{ value }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
-    <div class="ui segment">
-        <h3>{% trans "Associated pages" %}</h3>
-        <ul>
-        {% for page in pages %}
-            <li><a href="{% url 'wagtailadmin_pages:edit' page.id %}">{{ page.title }}</a> {% if page.live %}({% trans "Published" %}){% else %}({% trans "Draft" %}){% endif %}</li>
-        {% empty %}
-            <li>{% trans "No pages created yet." %}</li>
-        {% endfor %}
-        </ul>
-        {# wagtailadmin_pages:add expects app, model, and parent page id #}
-        {# use the root page id (1). adjust if your site uses different root. #}
-        <p><a href="{% url 'wagtailadmin_pages:add' 'pages' 'contentpage' 1 %}?piece={{ piece.id }}">{% trans "Add new content page" %}</a></p>
-    </div>
-
+    {% if can_edit_piece %}
+    <a class="ui button" href="{% url 'main_app:piece-update' piece.pk %}">{% trans "Edit" %}</a>
+    {% endif %}
+    <a class="ui button" href="{% url 'main_app:visitor-history' %}">{% trans "My visit" %}</a>
 </div>
-
 {% endblock %}

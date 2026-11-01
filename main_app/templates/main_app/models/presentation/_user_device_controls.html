@@ -1,0 +1,706 @@
+{% load i18n %}
+
+<style>
+  .presentation-shell[data-presentation-type="user_device"] {
+    position: relative;
+    height: 100vh;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  .presentation-shell[data-presentation-type="user_device"] .presentation-header {
+    justify-content: center;
+    min-height: 4rem;
+    padding: 0.75rem 4rem;
+    margin-bottom: 0;
+    text-align: center;
+  }
+
+  .presentation-shell[data-presentation-type="user_device"] .presentation-frame {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+  }
+
+  .presentation-shell[data-presentation-type="user_device"] .presentation-title {
+    color: #ffffff;
+    text-align: center;
+  }
+
+  .presentation-shell[data-presentation-type="user_device"] .presentation-header > .presentation-meta:last-child {
+    position: absolute;
+    right: 1rem;
+    top: 1.25rem;
+    color: #ffffff;
+  }
+
+  .presentation-shell[data-presentation-type="user_device"] .presentation-stage {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    background: #ffffff;
+    box-shadow: none;
+  }
+
+  .presentation-shell[data-presentation-type="user_device"] .presentation-slide,
+  .presentation-shell[data-presentation-type="user_device"] .presentation-slide.is-active {
+    height: 100%;
+    overflow: auto;
+    padding-bottom: 4.75rem;
+    border-radius: 0;
+  }
+
+  .presentation-device-menu {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 40;
+  }
+
+  [x-cloak] {
+    display: none !important;
+  }
+
+  .presentation-menu-button,
+  .presentation-favorite-button {
+    appearance: none;
+    border: 0;
+    cursor: pointer;
+    line-height: 1;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22);
+  }
+
+  .presentation-menu-button {
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.95);
+    color: #2563eb;
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+
+  .presentation-menu-panel {
+    min-width: 12rem;
+    max-width: 20rem;
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 0.6rem;
+    background: #ffffff;
+    color: #111827;
+    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.26);
+  }
+
+  .presentation-menu-link,
+  .presentation-menu-panel button {
+    display: block;
+    width: 100%;
+    padding: 0.65rem 0.75rem;
+    border: 0;
+    border-radius: 0.35rem;
+    background: transparent;
+    color: #111827;
+    cursor: pointer;
+    font: inherit;
+    text-align: left;
+    text-decoration: none;
+  }
+
+  .presentation-menu-link:hover,
+  .presentation-menu-panel button:hover {
+    background: #eef2ff;
+  }
+
+  .presentation-menu-form {
+    margin: 0;
+  }
+
+  .presentation-favorites-list,
+  .presentation-visited-list {
+    max-width: 18rem;
+    max-height: 15rem;
+    overflow: auto;
+    margin-top: 0.35rem;
+    padding-top: 0.35rem;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  .presentation-menu-root,
+  .presentation-menu-panel-view {
+    display: none;
+  }
+
+  .presentation-menu-root.is-visible,
+  .presentation-menu-panel-view.is-visible {
+    display: block;
+  }
+
+  .presentation-favorites-empty,
+  .presentation-visited-empty {
+    padding: 0.5rem 0.75rem;
+    color: #6b7280;
+  }
+
+  .presentation-visited-row {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    width: 100%;
+    padding: 0.55rem 0.7rem;
+    border: 0;
+    border-radius: 0.35rem;
+    background: transparent;
+    color: #111827;
+    cursor: pointer;
+    font: inherit;
+    text-align: left;
+  }
+
+  .presentation-visited-row:hover,
+  .presentation-visited-row.is-selected {
+    background: #eef2ff;
+  }
+
+  .presentation-visited-row.is-unvisited {
+    color: #9ca3af;
+    cursor: default;
+  }
+
+  .presentation-visited-row.is-unvisited.is-expandable {
+    cursor: pointer;
+  }
+
+  .presentation-visited-row.is-unvisited:hover {
+    background: transparent;
+  }
+
+  .presentation-visited-toggle-icon {
+    width: 1rem;
+    flex: 0 0 1rem;
+    color: #6b7280;
+  }
+
+  .presentation-visited-children {
+    margin-left: 1rem;
+    border-left: 1px solid #e5e7eb;
+  }
+
+  .presentation-favorite-button {
+    position: fixed;
+    left: 50%;
+    bottom: 1.15rem;
+    z-index: 35;
+    width: 3.2rem;
+    height: 3.2rem;
+    transform: translateX(-50%);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.96);
+    color: #2563eb;
+    font-size: 1.8rem;
+  }
+
+  .presentation-favorite-button.is-favorite {
+    color: #facc15;
+  }
+
+  @media (max-width: 767px) {
+    .presentation-shell[data-presentation-type="user_device"] {
+      min-height: 100dvh;
+      height: 100dvh;
+      padding: 0;
+    }
+
+    .presentation-shell[data-presentation-type="user_device"] .presentation-frame {
+      height: 100%;
+    }
+
+    .presentation-shell[data-presentation-type="user_device"] .presentation-header {
+      flex: 0 0 auto;
+      padding: 0.75rem 3.75rem;
+    }
+
+    .presentation-shell[data-presentation-type="user_device"] .presentation-header > .presentation-meta:last-child {
+      position: static;
+      margin-top: 0.35rem;
+    }
+  }
+</style>
+
+<div class="presentation-device-menu" x-data="{ open: false, view: 'root' }" data-presentation-menu>
+  <button
+    class="presentation-menu-button"
+    type="button"
+    aria-label="{% trans 'Open menu' %}"
+    :aria-expanded="open.toString()"
+    @click.stop="open = !open; if (!open) view = 'root'"
+  >☰</button>
+  <div class="presentation-menu-panel" x-show="open" @click.stop @click.outside="open = false; view = 'root'" x-cloak>
+    <div class="presentation-menu-root" :class="{ 'is-visible': view === 'root' }">
+      {% if request.user.is_authenticated %}
+      <form class="presentation-menu-form" method="post" action="{% url 'main_app:logout' %}">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+        <button type="submit">{% trans "Logout" %}</button>
+      </form>
+      {% else %}
+      <a class="presentation-menu-link" href="{% url 'main_app:login' %}?next={{ request.get_full_path|urlencode }}">{% trans "Login" %}</a>
+      {% endif %}
+      <button type="button" data-favorites-toggle @click="view = 'favorites'">{% trans "Favorites" %}</button>
+      <button type="button" data-visited-toggle="museum" @click="view = 'museum'">{% trans "Visited Museums" %}</button>
+      <button type="button" data-visited-toggle="exhibition" @click="view = 'exhibition'">{% trans "Visited Exhibitions" %}</button>
+      <button type="button" data-visited-toggle="piece" @click="view = 'piece'">{% trans "Visited Pieces" %}</button>
+    </div>
+    <div class="presentation-menu-panel-view" :class="{ 'is-visible': view === 'favorites' }">
+      <button type="button" @click="view = 'root'">← {% trans "Back" %}</button>
+      <div class="presentation-favorites-list" data-favorites-list></div>
+    </div>
+    <div class="presentation-menu-panel-view" :class="{ 'is-visible': view === 'museum' }">
+      <button type="button" @click="view = 'root'">← {% trans "Back" %}</button>
+      <div class="presentation-visited-list" data-visited-list="museum"></div>
+    </div>
+    <div class="presentation-menu-panel-view" :class="{ 'is-visible': view === 'exhibition' }">
+      <button type="button" @click="view = 'root'">← {% trans "Back" %}</button>
+      <div class="presentation-visited-list" data-visited-list="exhibition"></div>
+    </div>
+    <div class="presentation-menu-panel-view" :class="{ 'is-visible': view === 'piece' }">
+      <button type="button" @click="view = 'root'">← {% trans "Back" %}</button>
+      <div class="presentation-visited-list" data-visited-list="piece"></div>
+    </div>
+  </div>
+</div>
+
+<div
+  data-visited-current
+  data-museum-id="{{ visited_museum_id|default:'' }}"
+  data-museum-name="{{ visited_museum_name|default:'' }}"
+  data-exhibition-id="{{ visited_exhibition_id|default:'' }}"
+  data-exhibition-name="{{ visited_exhibition_name|default:'' }}"
+  data-exhibition-path="{{ visited_exhibition_path|default:'' }}"
+  data-piece-id="{{ visited_piece_id|default:'' }}"
+  data-piece-name="{{ visited_piece_name|default:'' }}"
+  data-piece-path="{{ visited_piece_path|default:'' }}"
+  hidden
+></div>
+{{ visitor_history|json_script:"visitor-history-data" }}
+
+<button
+  class="presentation-favorite-button"
+  type="button"
+  data-favorite-button
+  data-authenticated="{{ request.user.is_authenticated|yesno:'true,false' }}"
+  data-favorite-kind="{{ favorite_kind|default:'Presentation' }}"
+  data-favorite-name="{{ favorite_name|default:'' }}"
+  data-favorite-id="{{ favorite_id|default:'' }}"
+  aria-label="{% trans 'Save favorite' %}"
+  aria-pressed="false"
+>♥</button>
+
+<script>
+  (function () {
+    function initPresentationControls() {
+      const favoritesToggle = document.querySelector('[data-favorites-toggle]');
+      const favoritesList = document.querySelector('[data-favorites-list]');
+      const favoriteButton = document.querySelector('[data-favorite-button]');
+      const visitedCurrent = document.querySelector('[data-visited-current]');
+      const favoritesUrl = "{% url 'main_app:presentation-favorites' %}";
+      const favoritePrefix = 'mip-presentation-favorite:';
+      const expandedVisited = new Set();
+      let activeVisitedKind = '';
+      let selectedVisitedId = '';
+      let lastVisitedClick = { id: '', at: 0 };
+      const favoriteKind = favoriteButton ? (favoriteButton.dataset.favoriteKind || 'Presentation') : 'Presentation';
+      const favoriteName = favoriteButton ? (favoriteButton.dataset.favoriteName || '') : '';
+      const favoriteId = favoriteButton ? (favoriteButton.dataset.favoriteId || '') : '';
+      const currentPath = window.location.pathname;
+      const titleElement = document.querySelector('.presentation-title');
+      const currentTitle = favoriteName ? `${favoriteKind} | ${favoriteName}` : ((titleElement ? titleElement.textContent.trim() : document.title.trim()) || currentPath);
+
+      function csrfToken() {
+        const match = document.cookie.match(/(?:^|; )csrftoken=([^;]+)/);
+        return match ? decodeURIComponent(match[1]) : '';
+      }
+
+      function storageKey(path) {
+        return `${favoritePrefix}${path}`;
+      }
+
+      function localFavorites() {
+        const items = [];
+        const staleKeys = [];
+        for (let index = 0; index < window.localStorage.length; index += 1) {
+          const key = window.localStorage.key(index);
+          if (key && key.startsWith(favoritePrefix)) {
+            try {
+              const value = JSON.parse(window.localStorage.getItem(key) || '{}');
+              if (value && value.saved === true) {
+                items.push({
+                  path: key.slice(favoritePrefix.length),
+                  title: value.title || key.slice(favoritePrefix.length),
+                });
+              } else {
+                staleKeys.push(key);
+              }
+            } catch (error) {
+              staleKeys.push(key);
+            }
+          }
+        }
+        staleKeys.forEach((key) => window.localStorage.removeItem(key));
+        return items.sort((left, right) => left.title.localeCompare(right.title));
+      }
+
+      function setLocalFavorite(path, title, value) {
+        if (value) {
+          window.localStorage.setItem(storageKey(path), JSON.stringify({
+            saved: true,
+            title: title || path,
+          }));
+        } else {
+          window.localStorage.removeItem(storageKey(path));
+        }
+      }
+
+      function isCurrentFavorite() {
+        try {
+          const value = JSON.parse(window.localStorage.getItem(storageKey(currentPath)) || '{}');
+          return value.saved === true;
+        } catch (error) {
+          window.localStorage.removeItem(storageKey(currentPath));
+          return false;
+        }
+      }
+
+      function renderStar() {
+        if (!favoriteButton) {
+          return;
+        }
+        const active = isCurrentFavorite();
+        favoriteButton.classList.toggle('is-favorite', active);
+        favoriteButton.setAttribute('aria-pressed', active ? 'true' : 'false');
+      }
+
+      function renderFavorites(items) {
+        if (!favoritesList) {
+          return;
+        }
+        favoritesList.innerHTML = '';
+        if (!items.length) {
+          const empty = document.createElement('div');
+          empty.className = 'presentation-favorites-empty';
+          empty.textContent = "{% trans 'No favorites yet.' %}";
+          favoritesList.appendChild(empty);
+          return;
+        }
+
+        items.forEach((item) => {
+          const link = document.createElement('a');
+          link.className = 'presentation-menu-link';
+          link.href = item.path;
+          link.textContent = item.title;
+          favoritesList.appendChild(link);
+        });
+      }
+
+      function emptyVisitHierarchy() {
+        return { museums: {} };
+      }
+
+      function readVisitHierarchy() {
+        const script = document.getElementById('visitor-history-data');
+        try { return JSON.parse(script.textContent); }
+        catch (error) { return emptyVisitHierarchy(); }
+      }
+
+      function sortedNodes(collection) {
+        return Object.values(collection || {}).sort((left, right) => {
+          const visitedOrder = Number(Boolean(right.visited)) - Number(Boolean(left.visited));
+          if (visitedOrder) {
+            return visitedOrder;
+          }
+          return String(left.title).localeCompare(String(right.title));
+        });
+      }
+
+      function handleVisitedClick(node, hasChildren) {
+        selectedVisitedId = node.id;
+        const now = Date.now();
+        const isSecondClick = lastVisitedClick.id === node.id && now - lastVisitedClick.at < 1400;
+        lastVisitedClick = { id: node.id, at: now };
+
+        if (isSecondClick && node.visited && node.path) {
+          window.location.href = node.path;
+          return;
+        }
+
+        if (hasChildren) {
+          if (expandedVisited.has(node.id)) {
+            expandedVisited.delete(node.id);
+          } else {
+            expandedVisited.add(node.id);
+          }
+        }
+
+        renderVisited(activeVisitedKind);
+      }
+
+      function appendVisitedRow(parent, node, hasChildren) {
+        const row = document.createElement('button');
+        row.type = 'button';
+        row.className = 'presentation-visited-row';
+        row.classList.toggle('is-unvisited', !node.visited);
+        row.classList.toggle('is-expandable', hasChildren);
+        row.classList.toggle('is-selected', selectedVisitedId === node.id);
+        row.addEventListener('click', (event) => {
+          event.stopPropagation();
+          handleVisitedClick(node, hasChildren);
+        });
+
+        const icon = document.createElement('span');
+        icon.className = 'presentation-visited-toggle-icon';
+        icon.textContent = hasChildren ? (expandedVisited.has(node.id) ? '▾' : '▸') : '';
+        row.appendChild(icon);
+
+        const label = document.createElement('span');
+        label.textContent = node.title;
+        row.appendChild(label);
+        parent.appendChild(row);
+      }
+
+      function appendPieces(parent, pieces) {
+        sortedNodes(pieces).forEach((piece) => {
+          appendVisitedRow(parent, piece, false);
+        });
+      }
+
+      function appendExhibitions(parent, exhibitions) {
+        sortedNodes(exhibitions).forEach((exhibition) => {
+          const hasPieces = Boolean(exhibition.pieces && Object.keys(exhibition.pieces).length);
+          appendVisitedRow(parent, exhibition, hasPieces);
+          if (hasPieces && expandedVisited.has(exhibition.id)) {
+            const children = document.createElement('div');
+            children.className = 'presentation-visited-children';
+            appendPieces(children, exhibition.pieces);
+            parent.appendChild(children);
+          }
+        });
+      }
+
+      function renderVisited(kind) {
+        activeVisitedKind = kind;
+        const list = document.querySelector(`[data-visited-list="${kind}"]`);
+        if (!list) {
+          return;
+        }
+        const state = readVisitHierarchy();
+        list.innerHTML = '';
+
+        if (kind === 'museum') {
+          const museums = sortedNodes(state.museums).filter((museum) => museum.visited);
+          if (!museums.length) {
+            const empty = document.createElement('div');
+            empty.className = 'presentation-visited-empty';
+            empty.textContent = "{% trans 'Nothing visited yet.' %}";
+            list.appendChild(empty);
+            return;
+          }
+          museums.forEach((museum) => {
+            const hasExhibitions = Boolean(museum.exhibitions && Object.keys(museum.exhibitions).length);
+            appendVisitedRow(list, museum, hasExhibitions);
+            if (hasExhibitions && expandedVisited.has(museum.id)) {
+              const children = document.createElement('div');
+              children.className = 'presentation-visited-children';
+              appendExhibitions(children, museum.exhibitions);
+              list.appendChild(children);
+            }
+          });
+          return;
+        }
+
+        if (kind === 'exhibition') {
+          const exhibitions = [];
+          sortedNodes(state.museums).forEach((museum) => {
+            sortedNodes(museum.exhibitions).forEach((exhibition) => {
+              if (exhibition.visited) {
+                exhibitions.push(exhibition);
+              }
+            });
+          });
+          exhibitions.sort((left, right) => String(right.visitedAt).localeCompare(String(left.visitedAt)));
+          if (!exhibitions.length) {
+            const empty = document.createElement('div');
+            empty.className = 'presentation-visited-empty';
+            empty.textContent = "{% trans 'Nothing visited yet.' %}";
+            list.appendChild(empty);
+            return;
+          }
+          exhibitions.forEach((exhibition) => {
+            const hasPieces = Boolean(exhibition.pieces && Object.keys(exhibition.pieces).length);
+            appendVisitedRow(list, exhibition, hasPieces);
+            if (hasPieces && expandedVisited.has(exhibition.id)) {
+              const children = document.createElement('div');
+              children.className = 'presentation-visited-children';
+              appendPieces(children, exhibition.pieces);
+              list.appendChild(children);
+            }
+          });
+          return;
+        }
+
+        const pieceGroups = [];
+        sortedNodes(state.museums).forEach((museum) => {
+          sortedNodes(museum.exhibitions).forEach((exhibition) => {
+            if (exhibition.visited && exhibition.pieces && Object.keys(exhibition.pieces).length) {
+              pieceGroups.push(exhibition);
+            }
+          });
+        });
+        pieceGroups.sort((left, right) => String(right.visitedAt).localeCompare(String(left.visitedAt)));
+        if (!pieceGroups.length) {
+          const empty = document.createElement('div');
+          empty.className = 'presentation-visited-empty';
+          empty.textContent = "{% trans 'Nothing visited yet.' %}";
+          list.appendChild(empty);
+          return;
+        }
+        pieceGroups.forEach((exhibition) => {
+          appendVisitedRow(list, exhibition, true);
+          const children = document.createElement('div');
+          children.className = 'presentation-visited-children';
+          appendPieces(children, exhibition.pieces);
+          list.appendChild(children);
+        });
+      }
+
+      function replaceLocalFavorites(items) {
+        const keys = [];
+        for (let index = 0; index < window.localStorage.length; index += 1) {
+          const key = window.localStorage.key(index);
+          if (key) {
+            keys.push(key);
+          }
+        }
+        keys.forEach((key) => {
+          if (key.startsWith(favoritePrefix)) {
+            window.localStorage.removeItem(key);
+          }
+        });
+        items.forEach((item) => setLocalFavorite(item.path, item.title, true));
+        renderStar();
+      }
+
+      function syncFavorites(current) {
+        return fetch(favoritesUrl, {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken(),
+          },
+          body: JSON.stringify({
+            favorites: localFavorites(),
+            current: current || null,
+          }),
+        })
+          .then((response) => response.ok ? response.json() : { favorites: localFavorites() })
+          .then((data) => {
+            if (Array.isArray(data.favorites)) {
+              replaceLocalFavorites(data.favorites);
+            }
+            return data;
+          })
+          .catch(() => ({ favorites: localFavorites() }));
+      }
+
+      function loadFavorites() {
+        fetch(favoritesUrl, { credentials: 'same-origin' })
+          .then((response) => response.ok ? response.json() : { favorites: localFavorites() })
+          .then((data) => {
+            if (Array.isArray(data.favorites)) {
+              replaceLocalFavorites(data.favorites);
+              renderFavorites(data.favorites);
+            }
+          })
+          .catch(() => renderFavorites(localFavorites()));
+      }
+
+      if (favoritesToggle && favoritesList) {
+        favoritesToggle.addEventListener('click', (event) => {
+          event.stopPropagation();
+          loadFavorites();
+        });
+      }
+
+      document.querySelectorAll('[data-visited-toggle]').forEach((toggle) => {
+        toggle.addEventListener('click', (event) => {
+          event.stopPropagation();
+          const kind = toggle.dataset.visitedToggle;
+          const list = document.querySelector(`[data-visited-list="${kind}"]`);
+          if (!list) {
+            return;
+          }
+          renderVisited(kind);
+        });
+      });
+
+      if (favoriteButton) {
+        favoriteButton.addEventListener('click', (event) => {
+          event.stopPropagation();
+          const nextValue = !isCurrentFavorite();
+          setLocalFavorite(currentPath, currentTitle, nextValue);
+          renderStar();
+          syncFavorites({ path: currentPath, title: currentTitle, favorite: nextValue });
+        });
+        renderStar();
+        syncFavorites();
+      }
+
+
+      const introKey = 'mip-presentation-intro-seen';
+      if (window.introJs && !window.sessionStorage.getItem(introKey)) {
+        const stage = document.querySelector('.presentation-stage');
+        const steps = [];
+        if (stage) {
+          steps.push({
+            element: stage,
+            intro: "{% trans 'Tap the right side of the screen to go to the next slide. Tap the left side to return to the previous slide.' %}",
+            position: 'bottom',
+          });
+        }
+        if (favoriteButton) {
+          steps.push({
+            element: favoriteButton,
+            intro: "{% trans 'Tap the heart to save this presentation to your favorites. Tap it again to remove it.' %}",
+            position: 'top',
+          });
+        }
+
+        if (steps.length) {
+          window.introJs()
+            .setOptions({
+              steps: steps,
+              showProgress: true,
+              showBullets: false,
+              nextLabel: "{% trans 'Next' %}",
+              prevLabel: "{% trans 'Back' %}",
+              doneLabel: "{% trans 'Done' %}",
+              exitOnOverlayClick: true,
+            })
+            .oncomplete(() => window.sessionStorage.setItem(introKey, 'seen'))
+            .onexit(() => window.sessionStorage.setItem(introKey, 'seen'))
+            .start();
+        }
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPresentationControls);
+    } else {
+      initPresentationControls();
+    }
+  }());
+</script>

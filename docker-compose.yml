@@ -1,0 +1,59 @@
+# Copy MIYP/.env.example to MIYP/.env, replace every placeholder, then run:
+# docker compose --env-file MIYP/.env up --build
+services:
+  db:
+    image: postgres:16-bookworm
+    environment:
+      POSTGRES_DB: miyp_database
+      POSTGRES_USER: miyp_user
+      POSTGRES_PASSWORD: ${POSTGRES_DB_PASSWORD:?Set POSTGRES_DB_PASSWORD in MIYP/.env}
+    volumes:
+      - miyp_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U miyp_user -d miyp_database"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  web:
+    build: .
+    env_file:
+      - MIYP/.env
+    environment:
+      DB_TYPE: postgres
+      POSTGRES_DB_NAME: miyp_database
+      POSTGRES_DB_USER: miyp_user
+      POSTGRES_DB_PASSWORD: ${POSTGRES_DB_PASSWORD:?Set POSTGRES_DB_PASSWORD in MIYP/.env}
+      POSTGRES_DB_HOST: db
+      POSTGRES_DB_PORT: "5432"
+      MAIN_APP_REVERSE_PROXY: "on"
+      MAIN_APP_CSRF_TRUSTED_ORIGINS: https://${MIYP_HOSTNAME:-i7h8}:8000
+      GOOGLE_OAUTH_USE_LOOPBACK_REDIRECT: "on"
+      GOOGLE_OAUTH_LOOPBACK_HOST: localhost:8000
+      PUBLIC_HOSTNAME: ${MIYP_HOSTNAME:-i7h8}
+      SERVER_NAME: https://${MIYP_HOSTNAME:-i7h8}:8000/
+      WAGTAILADMIN_BASE_URL: https://${MIYP_HOSTNAME:-i7h8}:8000/cms
+    volumes:
+      - .:/app
+    expose:
+      - "8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  nginx:
+    build:
+      context: ./docker/nginx
+    environment:
+      NGINX_ENVSUBST_FILTER: PUBLIC_HOSTNAME
+      PUBLIC_HOSTNAME: ${MIYP_HOSTNAME:-i7h8}
+    volumes:
+      - ./MIYP/certificates:/etc/nginx/certs
+    ports:
+      - "80:80"
+      - "8000:443"
+    depends_on:
+      - web
+
+volumes:
+  miyp_postgres_data:

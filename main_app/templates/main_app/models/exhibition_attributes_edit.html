@@ -1,0 +1,118 @@
+{% extends "main_app/layout/base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="right floated sixteen wide column" id="content">
+    <div class="ui centered grid">
+        <div class="row">
+            <div class="ui sixteen wide column">
+                <div class="ui header segment">
+                    <h2>{% trans "Create piece attributes" %}</h2>
+                    <p>{% trans "Exhibition" %}: {{ exhibition.title }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="ui sixteen wide column">
+                <div class="ui segment">
+                    {% if error %}
+                    <div class="ui error message">{{ error }}</div>
+                    {% endif %}
+
+                    <form class="ui form" method="post">
+                        {% csrf_token %}
+
+                        <div id="attribute-inputs" class="attribute-grid">
+                            {% if existing_attributes %}
+                                {% for attribute in existing_attributes %}
+                                <div class="field attribute-field">
+                                    <label>{% trans "Attribute" %} {{ forloop.counter }}</label>
+                                    <input type="text" name="attribute_names" value="{{ attribute }}" maxlength="255" autocomplete="off">
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="field attribute-field">
+                                    <label>{% trans "Attribute" %} 1</label>
+                                    <input type="text" name="attribute_names" maxlength="255" autocomplete="off" required>
+                                </div>
+                            {% endif %}
+
+                            {% for index in "12345678901234567890" %}
+                            <div class="field attribute-field hidden-field" data-generated="1">
+                                <label>{% trans "Attribute" %}</label>
+                                <input type="text" name="attribute_names" maxlength="255" autocomplete="off">
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="ui divider"></div>
+                        <button class="ui primary button" type="submit">{% trans "Submit" %}</button>
+                        <a class="ui button" href="{% url 'main_app:exhibitions-list' %}">{% trans "Back" %}</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.attribute-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+    transition: all 0.2s ease;
+}
+
+.attribute-field {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.hidden-field {
+    display: none;
+}
+</style>
+
+<script>
+(function () {
+    const container = document.getElementById('attribute-inputs');
+    if (!container) {
+        return;
+    }
+
+    const fields = Array.from(container.querySelectorAll('.attribute-field'));
+
+    function showNextField(index) {
+        const next = fields[index + 1];
+        if (!next) {
+            return;
+        }
+
+        const input = fields[index].querySelector('input');
+        const hasValue = input && input.value.trim().length > 0;
+        if (hasValue && next.classList.contains('hidden-field')) {
+            next.classList.remove('hidden-field');
+            const label = next.querySelector('label');
+            if (label) {
+                label.textContent = label.textContent.split(' ')[0] + ' ' + (index + 2);
+            }
+        }
+    }
+
+    fields.forEach((field, index) => {
+        const input = field.querySelector('input');
+        if (!input) {
+            return;
+        }
+
+        input.addEventListener('input', function () {
+            showNextField(index);
+        });
+
+        if (input.value.trim().length > 0) {
+            showNextField(index);
+        }
+    });
+})();
+</script>
+{% endblock %}
