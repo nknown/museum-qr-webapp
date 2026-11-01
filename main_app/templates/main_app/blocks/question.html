@@ -1,0 +1,5 @@
+{% load wagtailcore_tags i18n %}
+<div class="mip-question">
+  <p>{{ value.question }}</p>
+  <details><summary>{% trans 'Reveal answer' %}</summary>{{ value.answer|richtext }}</details>
+</div>

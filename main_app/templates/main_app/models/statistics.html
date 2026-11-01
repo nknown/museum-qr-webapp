@@ -1,9 +1,91 @@
-{% extends 'main_app/layout/base.html' %}
+{% extends base %}
 {% load i18n %}
 
+{% block title %}{% trans 'Statistics' %}{% endblock %}
+
 {% block content %}
-<div class="ui segment">
-    <h2>{% trans "Statistics" %}</h2>
-    <p>{% trans "This page is a placeholder for statistics." %}</p>
+<div class="ui sixteen wide column" id="content">
+    <div class="ui centered grid">
+        <div class="row">
+            <div class="ui sixteen wide column">
+                <div class="ui header segment">
+                    <div class="ui clearing segment">
+                        <h2 class="ui left floated header"><i class="chart pie icon"></i>{% trans 'Statistics' %}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="ui sixteen wide column">
+                <div class="ui segment">
+                    <h3 class="ui header">{% trans 'Sessions and Users' %}</h3>
+                    <table class="ui celled table">
+                        <thead>
+                            <tr>
+                                <th>{% trans 'Session or User' %}</th>
+                                <th>{% trans 'Date of Access' %}</th>
+                                <th>{% trans 'Accesses' %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for access in accesses %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'main_app:statistics-history' access.session_or_user_history_kind access.session_or_user_history_pk %}">
+                                        {{ access.display_session_or_user }}
+                                    </a>
+                                </td>
+                                <td>{{ access.last_accessed_at|date:"Y-m-d H:i" }}</td>
+                                <td>{{ access.accesses }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3">{% trans 'No presentation accesses found.' %}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="ui sixteen wide column">
+                <div class="ui segment">
+                    <h3 class="ui header">{% trans 'Visited Exhibitions' %}</h3>
+                    <table class="ui celled table">
+                        <thead>
+                            <tr>
+                                <th>{% trans 'Visited Exhibition' %}</th>
+                                <th>{% trans 'Museum' %}</th>
+                                <th>{% trans 'Date of Access' %}</th>
+                                <th>{% trans 'Accesses' %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for access in exhibition_accesses %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'main_app:statistics-presentation' access.presentation_history_kind access.presentation_history_pk %}">
+                                        {{ access.presentation_title }}
+                                    </a>
+                                </td>
+                                <td>{{ access.museum_title|default:"-" }}</td>
+                                <td>{{ access.last_accessed_at|date:"Y-m-d H:i" }}</td>
+                                <td>{{ access.accesses }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4">{% trans 'No exhibition accesses found.' %}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
 </div>
 {% endblock %}

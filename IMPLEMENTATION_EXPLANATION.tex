@@ -1,0 +1,172 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[a4paper,margin=2.5cm]{geometry}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{titlesec}
+
+\title{Implementation Notes: Automatic Wagtail Presentation Tree from main\_app Curator Flows}
+\author{Project Notes}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Goal and Scope}
+This implementation introduces an automatic content-structure pipeline between the Django application layer (\texttt{main\_app}) and Wagtail pages. The objective is to let curators create exhibitions and pieces only through \texttt{main\_app} forms, while the required Wagtail presentation pages are created programmatically with a deterministic hierarchy.
+
+The solution includes:
+\begin{itemize}[leftmargin=*]
+    \item automatic Wagtail subtree creation on exhibition and piece creation,
+    \item explicit linkage between business models and Wagtail page roots,
+    \item disabling manual child-page creation in Wagtail admin,
+    \item draft-by-default page state at creation time.
+\end{itemize}
+
+\section{Files Modified and Added}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.37\textwidth} >{\raggedright\arraybackslash}p{0.58\textwidth}}
+\textbf{File} & \textbf{Purpose} \\\hline
+\texttt{main\_app/models.py} & Added presentation page models, shared content mixin, and link fields from \texttt{Exhibition} and \texttt{Piece} to Wagtail roots. \\
+\texttt{main\_app/views/models\_views.py} & Added orchestration methods to create/resolve page trees during \texttt{form\_valid}. \\
+\texttt{main\_app/wagtail\_hooks.py} & Added hooks to block manual page creation and remove add-child actions from admin UI. \\
+\texttt{main\_app/templates/main\_app/models/wagtail/*.html} & Added minimal templates for newly introduced page types. \\
+\texttt{main\_app/migrations/0002\_exhibitionpiecespage\_piecepage\_and\_more.py} & Schema migration for added models and link fields. \\
+\texttt{main\_app/scripts/seed\_museum.py} & Updated seeding behavior to keep pages unpublished by default. \\
+\end{longtable}
+
+\section{Data Model and Page Model Extensions}
+\subsection{Business model links}
+In \texttt{main\_app/models.py}, two link fields were added:
+\begin{itemize}[leftmargin=*]
+    \item \texttt{Exhibition.presentation\_page}: \texttt{OneToOneField} to \texttt{ExhibitionPage}
+    \item \texttt{Piece.presentation\_page}: \texttt{OneToOneField} to \texttt{PiecePage}
+\end{itemize}
+These fields make the integration explicit and idempotent: each domain object can be traced to exactly one presentation root page.
+
+\subsection{Wagtail hierarchy}
+The hierarchy is constrained with \texttt{parent\_page\_types} and \texttt{subpage\_types}:
+\begin{enumerate}[leftmargin=*]
+    \item Wagtail root
+    \item \texttt{ExhibitionPage}
+    \item Children of exhibition: \texttt{ExhibitionPublicPage}, \texttt{ExhibitionPrivatePage}, \texttt{ExhibitionPiecesPage}
+    \item Under \texttt{ExhibitionPiecesPage}: \texttt{PiecePage}
+    \item Children of piece: \texttt{PiecePublicPage}, \texttt{PiecePrivatePage}
+\end{enumerate}
+
+\subsection{Shared presentation fields}
+A reusable abstract mixin \texttt{PresentationContentMixin} was introduced with:
+\begin{itemize}[leftmargin=*]
+    \item \texttt{body} (\texttt{RichTextField})
+    \item \texttt{hero\_image} (FK to Wagtail image model)
+\end{itemize}
+This allows future editorial content expansion without repeating field definitions.
+
+\section{Creation Workflow in Views}
+The orchestration is implemented in \texttt{main\_app/views/models\_views.py}.
+
+\subsection{Exhibition creation path}
+\texttt{ExhibitionCreateView.form\_valid} now:
+\begin{enumerate}[leftmargin=*]
+    \item saves the \texttt{Exhibition} object,
+    \item adds the current user as admin,
+    \item calls \texttt{\_ensure\_exhibition\_presentation\_tree()}.
+\end{enumerate}
+
+\texttt{\_ensure\_exhibition\_presentation\_tree()} is responsible for:
+\begin{itemize}[leftmargin=*]
+    \item short-circuiting if \texttt{presentation\_page} already exists,
+    \item creating an \texttt{ExhibitionPage} under root,
+    \item creating fixed children with slugs \texttt{public}, \texttt{private}, \texttt{pieces},
+    \item persisting the link back to \texttt{Exhibition.presentation\_page}.
+\end{itemize}
+
+\subsection{Piece creation path}
+\texttt{PieceCreateView.form\_valid} now:
+\begin{enumerate}[leftmargin=*]
+    \item binds the new piece to the exhibition from URL context,
+    \item saves the \texttt{Piece},
+    \item calls \texttt{\_ensure\_piece\_presentation\_tree()}.
+\end{enumerate}
+
+\texttt{\_ensure\_piece\_presentation\_tree()}:
+\begin{itemize}[leftmargin=*]
+    \item returns early if the piece already has \texttt{presentation\_page},
+    \item resolves (or creates) the exhibition \texttt{pieces} page,
+    \item creates \texttt{PiecePage} and fixed children \texttt{public}/\texttt{private},
+    \item stores the link in \texttt{Piece.presentation\_page}.
+\end{itemize}
+
+\section{Helper Methods and Their Rationale}
+The following helpers were added in \texttt{ExhibitionCreateView} and reused by \texttt{PieceCreateView}:
+\begin{itemize}[leftmargin=*]
+    \item \texttt{\_unique\_child\_slug(parent, base)}: generates a non-colliding slug per parent.
+    \item \texttt{\_get\_or\_create\_child(parent, model\_class, title, slug, ...)}: idempotent child creation by slug.
+    \item \texttt{\_save\_as\_draft(page)}: stores a revision and guarantees not-live status.
+\end{itemize}
+
+These methods reduce duplication, centralize invariants, and prevent accidental duplicate page trees under retries.
+
+\section{Unpublished by Default (Draft State)}
+\subsection{Problem encountered}
+In this project configuration, newly inserted pages could still appear live after insertion/revision handling.
+
+\subsection{Final enforcement strategy}
+A dedicated method \texttt{\_save\_as\_draft(page)} was introduced:
+\begin{enumerate}[leftmargin=*]
+    \item call \texttt{save\_revision()},
+    \item if \texttt{page.live} is true, call \texttt{unpublish()}.
+\end{enumerate}
+This explicit post-save unpublish guarantees draft state regardless of local Wagtail behavior.
+
+The same draft policy was also applied in \texttt{main\_app/scripts/seed\_museum.py} to keep seeded pages unpublished.
+
+\section{Wagtail Admin Restrictions}
+In \texttt{main\_app/wagtail\_hooks.py}, hooks were added to enforce workflow discipline:
+\begin{itemize}[leftmargin=*]
+    \item block manual page creation requests in admin,
+    \item remove add-child actions from page listings/action menus.
+\end{itemize}
+
+This ensures curators create structure only through \texttt{main\_app} and prevents ad-hoc tree drift.
+
+\section{Templates Added}
+Minimal render templates were added for all introduced page types under:
+\texttt{main\_app/templates/main\_app/models/wagtail/}
+
+Current templates are intentionally simple, serving as placeholders for future editorial customization.
+
+\section{Behavioral Guarantees}
+After implementation, the system provides:
+\begin{itemize}[leftmargin=*]
+    \item deterministic hierarchy for each exhibition and piece,
+    \item idempotent creation (re-entry safe),
+    \item default draft state for generated pages,
+    \item no manual child creation path in Wagtail admin.
+\end{itemize}
+
+\section{Known Constraints}
+\begin{itemize}[leftmargin=*]
+    \item A \texttt{Piece} is currently modeled as belonging to one exhibition context in this workflow.
+    \item Reusing the same piece across multiple exhibitions would require model redesign (e.g., many-to-many plus revised presentation linking strategy).
+\end{itemize}
+
+\section{Validation Summary}
+Validation was done via:
+\begin{itemize}[leftmargin=*]
+    \item migration generation and apply,
+    \item \texttt{python manage.py check},
+    \item smoke tests through create views verifying expected subtree and \texttt{live=False} across generated nodes.
+\end{itemize}
+
+\section{Possible Next Iterations}
+\begin{itemize}[leftmargin=*]
+    \item add a formal management command for deterministic backfill of legacy exhibitions/pieces,
+    \item switch from simple rich text fields to structured content blocks if presentation complexity grows,
+    \item add tests that assert full tree structure and publication state per create operation.
+\end{itemize}
+
+\end{document}

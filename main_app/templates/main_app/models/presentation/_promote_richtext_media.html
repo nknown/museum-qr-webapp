@@ -1,0 +1,62 @@
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.mip-user-device-template, .mip-on-site-template').forEach(function (template) {
+      const mediaSlot = template.querySelector('[data-media-slot]');
+      const richTexts = Array.from(template.querySelectorAll('[data-slide-richtext]'));
+
+      if (!mediaSlot || !richTexts.length || !mediaSlot.querySelector('.mip-empty-media')) {
+        return;
+      }
+
+      const media = richTexts
+        .map(function (richText) {
+          return richText.querySelector('img, video, iframe, object');
+        })
+        .find(Boolean);
+      if (!media) {
+        const mediaColumn = mediaSlot.closest('.mip-user-device-column');
+        const textColumn = richTexts[0].closest('.mip-user-device-column');
+        if (mediaColumn && textColumn) {
+          mediaColumn.remove();
+          textColumn.classList.remove('ten', 'fourteen');
+          textColumn.classList.add('sixteen');
+          template.classList.add('mip-text-only-template');
+        }
+        return;
+      }
+
+      mediaSlot.replaceChildren();
+      mediaSlot.appendChild(media);
+
+      if (media.tagName.toLowerCase() === 'video') {
+        media.controls = true;
+      }
+
+      richTexts.forEach(function (richText) {
+        richText.querySelectorAll('p').forEach(function (paragraph) {
+          if (!paragraph.textContent.trim() && !paragraph.children.length) {
+            paragraph.remove();
+          }
+        });
+      });
+    });
+
+    document.querySelectorAll('.mip-on-site-standard-template').forEach(function (template) {
+      const source = template.querySelector('[data-column-source]');
+      const targets = Array.from(template.querySelectorAll('[data-column-target]'));
+      if (!source || !targets.length) {
+        return;
+      }
+
+      const blocks = Array.from(source.childNodes).filter(function (node) {
+        return node.nodeType !== Node.TEXT_NODE || node.textContent.trim();
+      });
+
+      blocks.forEach(function (block, index) {
+        targets[index % targets.length].appendChild(block);
+      });
+
+      source.remove();
+    });
+  });
+</script>

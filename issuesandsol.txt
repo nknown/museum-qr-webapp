@@ -1,0 +1,9 @@
+issuesandsol
+
+- Right off the bat: mostly yes for this workspace after running migrations.
+- Anonymous presentation visits now create a Django session key and a matching PresentationSession record.
+- When the same browser later logs in, the session gets linked to the account through the login signal.
+- Session loss between requests should not be a problem here because the app already has Django SessionMiddleware enabled and the session is stored server-side.
+- The tutorial’s CORS and withCredentials warnings are not relevant for this same-origin Django setup.
+- If you split the frontend and backend onto different origins later, then you will need the tutorial’s cross-origin session settings.
+- Production cookie settings may still need a review before deployment if HTTPS or cross-origin access is introduced.

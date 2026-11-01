@@ -1,0 +1,24 @@
+{% load wagtailcore_tags wagtailimages_tags i18n %}
+
+<div class="ui centered grid mip-user-device-template">
+  <div class="ten wide computer fourteen wide tablet sixteen wide mobile column mip-user-device-column">
+    <div class="mip-user-device-media" data-media-slot>
+      {% if slide.hero_image %}
+        {% image slide.hero_image fill-900x900 as hero %}
+        <img src="{{ hero.url }}" alt="{{ slide.title }}">
+      {% else %}
+        {% for item in slide.gallery_images.all %}
+          {% if forloop.first %}
+            {% image item.image fill-900x900 as gallery_image %}
+            <img src="{{ gallery_image.url }}" alt="{{ item.caption|default:slide.title }}">
+          {% endif %}
+        {% empty %}
+          <div class="mip-empty-media">{% trans "No media" %}</div>
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+  <div class="ten wide computer fourteen wide tablet sixteen wide mobile column mip-user-device-column">
+    <div class="mip-slide-body" data-slide-richtext>{{ slide.body|richtext }}{% include_block slide.content %}</div>
+  </div>
+</div>

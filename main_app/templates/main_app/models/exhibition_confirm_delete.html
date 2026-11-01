@@ -1,0 +1,36 @@
+{% extends 'main_app/layout/base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans 'Confirm Delete Exhibition' %}{% endblock %}
+
+{% block content %}
+<div class="ui container" style="margin-top: 2rem;">
+    <div class="ui centered grid">
+        <div class="row">
+            <div class="ui sixteen wide column">
+                <div class="ui error message">
+                    <div class="header">{% trans 'Delete Exhibition' %}</div>
+                    <p>{% trans 'Are you sure you want to delete this exhibition?' %}</p>
+                    <p><strong>{{ object.title }}</strong></p>
+                    <p style="color: rgb(195, 56, 56);">{% trans 'This action will:' %}</p>
+                    <ul>
+                        <li>{% trans 'Delete the exhibition and all its pieces' %}</li>
+                        <li>{% trans 'Delete all associated slideshow pages' %}</li>
+                        <li>{% trans 'This action cannot be undone!' %}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="ui sixteen wide column">
+                <form method="post">
+                    {% csrf_token %}
+                    <a href="{% url 'main_app:exhibitions-list' %}" class="ui button">{% trans 'Cancel' %}</a>
+                    <button type="submit" class="ui red button">{% trans 'Delete Exhibition' %}</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "wagtailadmin/base.html" %}
+{% load wagtailadmin_tags static %}
+{% block titletag %}Museum Branding{% endblock %}
+{% block extra_css %}{{ block.super }}{{ form.media.css }}
+<style>
+.template-settings {max-width: 960px; padding-bottom: 3rem;}
+.template-settings .field {margin: 1.5rem 0;}
+.template-settings label {display:block;font-weight:600;margin-bottom:.4rem;}
+.template-settings .errorlist {color:var(--w-color-critical-200);}
+.appearance-preview {position:relative;isolation:isolate;overflow:hidden;border:1px solid #999;border-radius:12px;min-height:260px;padding:2rem;margin:2rem 0;background:white;color:black;}
+.appearance-preview img {position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:contrast(.45) saturate(.5);z-index:-2;}
+.preview-overlay {position:absolute;inset:0;z-index:-1;}
+.preview-copy {padding:1rem;border-radius:8px;max-width:28rem;}
+</style>{% endblock %}
+{% block content %}
+{% include "wagtailadmin/shared/header.html" with title="Museum Branding" icon="form" %}
+<div class="nice-padding template-settings">
+<p>Choose the shared background for a museum's exhibition and piece presentations, on site and on visitors’ devices.</p>
+{% if form %}
+<form method="post" id="appearance-form">
+{% csrf_token %}
+<label for="target">Edit settings for</label>
+<select id="target" name="target">{% for key,label in targets %}<option value="{{ key }}" {% if selected == key %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+<button class="button button-secondary" type="submit" formmethod="get">Load settings</button>
+<h2>{{ target.title }}</h2>
+<p>All current and future exhibitions assigned to this museum inherit its branding. Presentation layouts belong to individual exhibitions and are managed separately in Templates → Presentation Layouts.</p>
+{{ form.non_field_errors }}
+{% for field in form %}<div class="field">{{ field.label_tag }}{{ field }}{{ field.errors }}{% if field.help_text %}<p>{{ field.help_text }}</p>{% endif %}</div>{% endfor %}
+<p>Choose an optional background texture using Wagtail’s image chooser, which also supports uploading a new image.</p>
+<div class="appearance-preview" id="appearance-preview" aria-label="Background appearance preview"><img id="preview-image" alt="" hidden><div class="preview-overlay" id="preview-overlay"></div><div class="preview-copy" id="preview-copy"><h3>Presentation title</h3><p>Exhibition stories and object descriptions remain readable over the softened background texture.</p></div></div>
+<p id="preview-note">Background preview only; the selected layout controls content placement.</p>
+<button class="button" type="submit">Apply to museum</button>
+</form>{% else %}<p>No museums or exhibitions are available to manage.</p>{% endif %}
+
+</div>{% endblock %}
+{% block extra_js %}{{ block.super }}{{ form.media.js }}<script defer src="{% static 'main_app/js/presentation_appearance_preview.js' %}"></script>{% endblock %}
