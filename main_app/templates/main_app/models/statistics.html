@@ -1,0 +1,51 @@
+{% extends base %}
+{% load i18n %}
+
+{% block title %}{% trans 'Statistics' %}{% endblock %}
+
+{% block content %}
+<div class="ui sixteen wide column" id="content">
+    <div class="ui centered grid">
+        <div class="row">
+            <div class="ui sixteen wide column">
+                <div class="ui header segment">
+                    <div class="ui clearing segment">
+                        <h2 class="ui left floated header"><i class="chart pie icon"></i>{% trans 'Statistics' %}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="ui sixteen wide column">
+                <div class="ui segment">
+                    <table class="ui celled table">
+                        <thead>
+                            <tr>
+                                <th>{% trans 'Session' %}</th>
+                                <th>{% trans 'User' %}</th>
+                                <th>{% trans 'Created at' %}</th>
+                                <th>{% trans 'Accesses' %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for session in sessions %}
+                            <tr>
+                                <td><a href="{% url 'main_app:statistics-session' session.pk %}">{{ session.session_key }}</a></td>
+                                <td>{{ session.display_user }}</td>
+                                <td>{{ session.created_at }}</td>
+                                <td>{{ session.access_count }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5">{% trans 'No sessions found.' %}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,1 @@
+from main_app.tests import test_api

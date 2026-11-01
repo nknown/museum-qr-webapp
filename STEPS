@@ -1,0 +1,63 @@
+Wagtail Child Reorder Test Steps
+
+Goal
+Verify that children of any On Site page and any User Device page can be reordered as sibling pages in Wagtail.
+Primary target requested: http://127.0.0.1:8000/cms/pages/5/
+
+Prerequisites
+1. Activate environment:
+   source ~/MIP/venv/bin/activate
+2. Start server:
+   python manage.py runserver
+3. Log in to Wagtail admin with a user that can edit/move pages.
+
+A) Validate on the requested page (User Device page id 5)
+1. Open:
+   http://127.0.0.1:8000/cms/pages/5/
+2. Confirm this is a User Device page and has at least two child pages (dummy slide pages are fine).
+3. If there are fewer than two children, create two child pages under this parent.
+4. Reorder children:
+   - First make sure ordering is by manual order (ord) in the page listing (not by latest revision or title).
+   - If drag handles are visible in this listing, drag one child above/below the other.
+   - If drag handles are not visible in your Wagtail UI/version, use the page Move action and move one child relative to its sibling under the same parent.
+5. Refresh the same URL.
+6. Confirm the order is persisted.
+
+B) Validate on another User Device page
+1. Open another User Device parent page listing in Wagtail.
+2. Ensure two child pages exist.
+3. Reorder siblings.
+4. Refresh and confirm persisted order.
+
+C) Validate on an On Site page
+1. Open an On Site parent page listing in Wagtail.
+2. Ensure two child pages exist.
+3. Reorder siblings.
+4. Refresh and confirm persisted order.
+
+D) Validate piece order inside Pieces
+1. Open the Pieces parent page listing in Wagtail (the parent that contains Piece pages).
+2. Ensure there are at least two Piece child pages.
+3. Confirm listing is using manual order (ord).
+4. Reorder Piece siblings:
+   - If drag handles are visible, drag one Piece above/below the other.
+   - If drag handles are not visible, use Move action to reposition one Piece relative to its sibling under the same Pieces parent.
+5. Refresh and confirm persisted Piece order.
+
+E) Negative checks (should NOT happen)
+1. No PermissionDenied when reordering children.
+2. No server errors during reorder.
+3. Reorder should not require changing models.
+4. If ordering is not set to manual order (ord), visible order can differ from tree order.
+
+Useful quick checks
+1. Confirm children type in models:
+   - ExhibitionOnSitePage and ExhibitionUserDevicePage allow SlideshowSlidePage children.
+   - PieceOnSitePage and PieceUserDevicePage allow SlideshowSlidePage children.
+2. Creation order in views is only default insertion order; it does not lock future reorder.
+
+Pass criteria
+1. You can change sibling order under User Device and On Site parents.
+2. You can change sibling order for Piece pages under the Pieces parent.
+3. The changed order persists after page refresh.
+4. The same behavior works for Exhibition and Piece branches.

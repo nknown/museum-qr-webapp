@@ -1,0 +1,35 @@
+/* Minimal override for Wagtail 7: always expand breadcrumbs and hide toggle */
+
+/* Make breadcrumb container visible and allow wrapping */
+[data-w-breadcrumbs] {
+  overflow: visible !important;
+}
+
+/* Ensure collapsed breadcrumb items are shown (they are marked with the `hidden` attribute) */
+[data-w-breadcrumbs] li[hidden] {
+  display: list-item !important;
+  visibility: visible !important;
+}
+
+/* Remove width limiting applied via utility classes like w-max-w-0 */
+[data-w-breadcrumbs] li {
+  max-width: none !important;
+  white-space: normal !important;
+  overflow: visible !important;
+}
+
+/* Hide the breadcrumb toggle button */
+[data-w-breadcrumbs] [data-w-breadcrumbs-target="toggle"],
+[aria-label="Toggle breadcrumbs"] {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Optionally hide common action-menu / three-dots toggles in admin lists */
+button[aria-label="More"],
+button[aria-label="Actions"],
+.w-actions__toggle,
+.action-toggle {
+  display: none !important;
+}

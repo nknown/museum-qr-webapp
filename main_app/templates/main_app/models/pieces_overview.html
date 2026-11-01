@@ -1,0 +1,52 @@
+{% extends base %}
+{% load i18n %}
+{% load static %}
+
+{% block content %}
+<div class="ui sixteen wide column" id="content">
+    <div class="ui centered grid">
+        <div class="row">
+            <div class="ui sixteen wide column">
+                <div class="ui header segment">
+                    <div class="ui clearing segment">
+                        <h2 class="ui left floated header"><i class="dolly icon"></i>{% trans "Exhibitions:" %}</h2>
+                        <a class="ui right floated primary button" href="{% url 'main_app:exhibition-create' %}">{% trans "New Exhibition" %}</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="ui sixteen wide column">
+                <div class="ui segment">
+                    <table class="ui celled table">
+                        <thead>
+                            <tr>
+                                <th>{% trans "Exhibition" %}</th>
+                                <th>{% trans "Number of pieces" %}</th>
+                                <th>{% trans "Actions" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for card in exhibition_cards %}
+                            <tr>
+                                <td>{{ card.exhibition.title }}</td>
+                                <td>{{ card.piece_count }}</td>
+                                <td>
+                                    <a href="{% url 'main_app:exhibition-update' card.exhibition.pk %}"><button class='ui button'>{% trans 'Edit' %}</button></a>
+                                    <a href="{% url 'main_app:exhibition-delete' card.exhibition.pk %}"><button class='ui negative button'>{% trans 'Remove' %}</button></a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3">{% trans "No exhibitions found." %}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

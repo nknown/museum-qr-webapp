@@ -1,0 +1,66 @@
+{% extends "main_app/layout/base.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block content %}
+
+    <div class="right floated sixteen wide  column" id="content">
+        <div class="ui centered grid">
+            <div class="row">
+                <div class="ui sixteen wide column">
+                    <div class="ui header segment">
+                        <h2>{% if form.instance.pk %}{% trans "Edit Piece" %}{% else %}{% trans "New Piece" %}{% endif %}</h2>
+                        {% if exhibition %}
+                            <p>{% trans "Exhibition" %}: {{ exhibition.title }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="ui sixteen wide column">
+                    <div class="ui segment">
+                        <form class="ui form{% if errors %} error{% endif %}" method="post">
+                            {% csrf_token %}{{ form }}
+
+                            <div class="ui divider"></div>
+                            <button class="ui primary button" type="submit">{% trans "Submit" %}</button>
+                            {% if exhibition %}
+                                <a class="ui button" href="{% url 'main_app:exhibition-update' exhibition.pk %}">{% trans "Back" %}</a>
+                            {% endif %}
+                        </form>
+                    </div>
+
+                    {% if piece.pk %}
+                    <div class="ui segment">
+                        <h4>{% trans "Presentations" %}</h4>
+                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                            {% if piece_presentations.on_site %}
+                            <a class="ui button" href="{{ piece_presentations.on_site }}">{% trans "Edit Onsite Presentation" %}</a>
+                            {% else %}
+                            <button class="ui button" disabled>{% trans "Edit Onsite Presentation" %}</button>
+                            {% endif %}
+                            {% if piece_presentations.user_device %}
+                            <a class="ui button" href="{{ piece_presentations.user_device }}">{% trans "Edit User Device Presentation" %}</a>
+                            {% else %}
+                            <button class="ui button" disabled>{% trans "Edit User Device Presentation" %}</button>
+                            {% endif %}
+                            {% if piece_presentations.on_site %}
+                            <a class="ui button" href="{% url 'main_app:piece-presentation' piece.pk 'on_site' %}">{% trans "View Onsite Presentation" %}</a>
+                            {% else %}
+                            <button class="ui button" disabled>{% trans "View Onsite Presentation" %}</button>
+                            {% endif %}
+                            {% if piece_presentations.user_device %}
+                            <a class="ui button" href="{% url 'main_app:piece-presentation' piece.pk 'user_device' %}">{% trans "View User Device Presentation" %}</a>
+                            {% else %}
+                            <button class="ui button" disabled>{% trans "View User Device Presentation" %}</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

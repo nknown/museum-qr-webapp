@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+{% load static %}
+{% load i18n %}
+
+<html lang="pt">
+  <head>
+        {% block head %}
+        <meta charset="utf-8" />
+        <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible" />
+        <meta name="description" content="Template for ELAB app"/>
+        <meta name="keywords" content="ELab layout, template, web site" />
+        <meta name="author" content="José Veiga" />
+        <meta name="theme-color" content="#ffffff" />
+        <!--HTML title-->
+        <title>elab layout </title>
+        <!--Block styling-->
+
+        {% comment %} <link rel="stylesheet" href="vendors/fomantic-ui/semantic.min.css"> {% endcomment %}
+        <link rel="stylesheet"  href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css" type="text/css"/>
+        <link rel="stylesheet" href="{% static 'main_app/css/style.css' %}">
+        <!-- Put your external css file here-->
+
+
+
+        <!-- for semantic ui icon - follow this link
+             https://github.com/Semantic-Org/Semantic-UI-Docs/blob/master/server/partials/examples/icon.html-->
+
+        <style>
+            body {
+                background-color: #ddd;
+            }
+            #v-container {
+              background: #ddd;
+              height: 50vh;
+              width: 100%;
+            }
+
+            .image-margin {
+              margin-top: 16px;
+              margin-bottom: 16px;
+            }
+
+            .image-border {
+              border-radius: 4px !important;
+            }
+
+            .no-background {
+              background: transparent !important;
+            }
+        </style>
+        {% endblock %}
+  </head>
+  <body>
+{% block content %}
+<!--content-->
+<div id="v-container" class="ui grid middle aligned">
+   <div class="row">
+      <div class="column" align="middle">
+         <div class="ui raised card ">
+            <div class="ui small centered image no-background ">
+               <img class="image-margin image-border" src="{% static 'main_app/images/main_app_logo.png' %}" alt="elab_logo">
+            </div>
+            <div class="content">
+               <div class="ui header">{% trans 'Log-in to FREE' %}</div>
+               <form class="ui large form error" method="POST" action="{% url 'main_app:login'%}">
+                  {% csrf_token %}
+                  <div class="field">
+                     <div class="ui left icon input">
+                        <i class="user icon"></i>
+                        <input type="text" name="username" placeholder="{% trans 'Username' %}" >
+                        <input type="hidden" name="next" value="{{next}}">
+                     </div>
+                  </div>
+                  <div class="field">
+                     <div class="ui left icon input">
+                        <i class="lock icon"></i>
+                        <input type="password" name="password" placeholder="{% trans 'Password' %}" >
+                     </div>
+                  </div>
+                  <input type="submit" value="{% trans 'Login' %}" class="ui fluid large blue submit button">
+                  {% if form.errors %}
+                    <div class="ui error message">
+                      {% trans 'Your username and password didn\'t match. Please try again' %}
+                    </div>
+                  {% endif %}
+                  {% if next and next != '/' %}
+                    {% if user.is_authenticated %}
+                    <div class="ui error message">
+                        Your account doesn't have access to this page. To proceed,
+                        please login with an account that has access.
+                    </div>
+                    {% else %}
+                    <div class="ui error message">
+                        Please login to see this page.
+                    </div>
+                    {% endif %}
+                  {% endif %}
+               </form>
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+{% if back_ends %}
+<div class="ui horizontal divider">
+  Or
+</div>
+<div id="center_buttom_login_ext_out">
+  {% for b in back_ends %}
+      <a class="center_buttom_login_ext_inner" href="{% url 'social:begin' b.classname %}">
+      <div class="ui teal labeled icon button">
+        {{ b.name }}
+        <i class="signup icon"></i>
+      </div>
+    </a>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}
+</body>
+{% block script %}
+{% endblock %}
+</html>
+

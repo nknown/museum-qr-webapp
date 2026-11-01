@@ -1,0 +1,35 @@
+{% load i18n %}
+{% load static %}
+
+<!--  BEGIN SIDEBAR -->
+<!-- mobile and table (sidebar) -->
+<div class="top tablet only mobile only hidden column">
+    <div class = "mobiletabletsidebar animate hidden" id="mobiletabletsidebar" >
+    <!--<div class="left floated three wide computer column" id="computersidebar">-->
+        <div class="ui left fixed vertical menu scrollable">
+            {% include 'main_app/menus.html' %}
+            {% include 'main_app/layout/lang_selector.html' %}
+            {% include 'main_app/sponsor_logos.html' %}
+        </div>
+<!--</div>-->
+    </div>
+</div>
+
+<!-- End mobile sidebar -->
+<!-- BEGIN COMPUTER SIDEBAR -->
+<div class="top four wide computer only column "> 
+        <div class="ui vertical fluid menu scrollable" id="simplefluid">
+            <div class="clearsidebar" style="overflow-y:scroll;"></div>
+
+            {% include 'main_app/menus.html' %}
+            {% include 'main_app/layout/lang_selector.html' %}
+            {% include 'main_app/sponsor_logos.html' %}
+        </div>
+</div>
+
+
+
+
+
+
+

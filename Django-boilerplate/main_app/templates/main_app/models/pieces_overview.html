@@ -1,0 +1,66 @@
+{% extends base %}
+{% load i18n %}
+{% load static %}
+
+{% block content %}
+<div class="ui sixteen wide column" id="content">
+    <div class="ui centered grid">
+        <div class="row">
+            <div class="ui sixteen wide column">
+                <div class="ui header segment">
+                    <h2><i class="cubes icon"></i>{% trans "Pieces by Exhibition" %}</h2>
+                </div>
+            </div>
+        </div>
+
+        {% for exhibition in exhibitions %}
+        <div class="row">
+            <div class="ui sixteen wide column">
+                <div class="ui segment">
+                    <div class="ui clearing segment">
+                        <h3 class="ui left floated header">{{ exhibition.title }}</h3>
+                        <a class="ui right floated button" href="{% url 'main_app:piece-create' exhibition_id=exhibition.pk %}">{% trans "Add piece" %}</a>
+                    </div>
+
+                    <p>{{ exhibition.description }}</p>
+
+                    <table class="ui celled table">
+                        <thead>
+                            <tr>
+                                <th>{% trans "Title" %}</th>
+                                <th>{% trans "Description" %}</th>
+                                <th>{% trans "Date created" %}</th>
+                                <th>{% trans "Actions" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for piece in exhibition.pieces.all %}
+                            <tr>
+                                <td>{{ piece.title }}</td>
+                                <td>{{ piece.description }}</td>
+                                <td>{{ piece.date_created }}</td>
+                                <td>
+                                    <a href="{% url 'main_app:piece' piece.pk %}"><button class='ui button'>{% trans 'Show' %}</button></a>
+                                    <a href="{% url 'main_app:piece-update' piece.pk %}"><button class='ui button'>{% trans 'Edit' %}</button></a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4">{% trans "No pieces yet." %}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="row">
+            <div class="ui sixteen wide column">
+                <div class="ui message">{% trans "No exhibitions found." %}</div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
