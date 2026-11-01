@@ -1,0 +1,47 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-11-16 21:10-0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: .\static\free\js\plotly_results.js:358
+msgid "Linear velocity vs sample number"
+msgstr ""
+
+#: .\static\free\js\plotly_results.js:367
+#: .\static\free\js\plotly_results.js:454
+#: .\static\free\js\plotly_results.js:511
+msgid "# Samples"
+msgstr ""
+
+#: .\static\free\js\plotly_results.js:378
+msgid "Linear velocity [m/s]"
+msgstr ""
+
+#: .\static\free\js\plotly_results.js:406
+#: .\static\free\js\plotly_results.js:432
+msgid "Histogram of the pendulum periods"
+msgstr ""
+
+#: .\static\free\js\plotly_results.js:445
+#: .\static\free\js\plotly_results.js:520
+msgid "Period [s]"
+msgstr ""
+
+#: .\static\free\js\plotly_results.js:501
+msgid "Period vs. number of samples"
+msgstr ""

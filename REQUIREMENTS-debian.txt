@@ -1,0 +1,2 @@
+sudo apt install spatialite-bin
+sudo apt install libsqlite3-mod-spatialite

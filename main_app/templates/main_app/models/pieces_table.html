@@ -1,0 +1,40 @@
+{% extends 'main_app/layout/base.html' %}
+{% load static %}
+{% load django_tables2 %}
+{% load i18n %}
+
+{% block title %} {% trans 'List of Pieces' %} {% endblock %}
+
+{% block content %}
+    <div class="right floated sixteen wide  column" id="content">
+        <div class="ui centered grid">
+            <div class="row">
+                <div class=" ui sixteen wide column">
+                    <div class="ui header segment">
+                        <h2><i class="cube icon"></i>{% trans 'List of Pieces' %}</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class=" ui sixteen wide column">
+                    <div class="ui header segment">
+                        <h2></i>{% trans 'Add a Piece' %} </h2>
+                        <a href="{% url 'main_app:piece-create' %}"><button class='ui button'>{% trans 'New'%}</button></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class=" ui sixteen wide column">
+                    <div class="ui segment">
+                        <div class="ui blue ribbon icon label">{% trans 'List of your Pieces' %}</div>
+                        <div class="ui divider"></div>
+
+                        {% render_table table %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

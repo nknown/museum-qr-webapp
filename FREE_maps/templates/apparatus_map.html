@@ -1,0 +1,314 @@
+{% extends 'free/base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block headscript%}
+<script id="csrf_token" type="application/json">{{csrf_token}}</script>
+{{apparatus.config|json_script:"apparatus-config"}}
+{{apparatus.id|json_script:"apparatus-id"}}
+
+<script>
+    var next_result_id =0;
+    X_CSRFToken = document.getElementById('csrf_token').textContent
+
+
+
+    var apparatus_id = JSON.parse(document.getElementById('apparatus-id').textContent);
+    var apparatus_coord = [{{apparatus.lat|stringformat:".4f"}}, {{apparatus.long|stringformat:".4f"}}]
+    console.log({{apparatus_id}})
+</script>
+
+
+{% endblock %}
+
+
+{% block head %}
+
+<script src="https://code.jquery.com/jquery-3.6.0.slim.min.js" integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css" type="text/css"/>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+
+    <!-- required for showing running execution -->    
+     <script src='//unpkg.com/leaflet-arc/bin/leaflet-arc.min.js'></script>
+     <script src="{% static 'FREE_maps/js/leaflet.motion.min.js' %}" ></script>
+     <script src="https://unpkg.com/leaflet-ant-path" type="text/javascript"></script>
+
+  <!-- required for showing finished executions-->     
+    <script src="{% static 'FREE_maps/js/leaflet.markercluster.js' %}" ></script>
+    <link rel="stylesheet" href="{% static 'FREE_maps/css/MarkerCluster.Default.css' %}">
+    <link rel="stylesheet" href="{% static 'FREE_maps/css/MarkerCluster.css' %}">
+    <script src="{% static 'FREE_maps/js/leaflet-heat.js' %}" ></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<style>
+      #map { height: 85vh}
+      .leaflet-tooltip.my-labels {
+          background-color: transparent;
+          border: transparent;
+          box-shadow: none;
+          font-weight: bold;
+          font-size: 15px;
+        }
+        moving-icon{
+          background-color: transparent;
+          border: transparent;
+          width: 100px;
+        }
+</style>
+{% endblock %}  
+
+     
+{% block title %} 
+    {{apparatus.apparatus_type.name}} {{apparatus.id}} in {{apparatus.location}}
+{% endblock %}
+
+{% block content %}
+
+<div class=" ui white sixteen wide column" id="content">
+
+    <h1 >{{apparatus.apparatus_type.name}} {{apparatus.id}} in {{apparatus.location}}</h1>  
+
+
+    <div class="ui raised very segment " >
+      <div id="map"></div>
+    </div>
+
+</div>   
+
+{% endblock %}
+
+
+
+
+
+{% block script %}
+<script>
+
+
+var experiments_array = []
+var map 
+var apparatus_marker
+
+var execution_path = null
+var anim_path
+
+var moving_marker = null
+var previous_exec = -1
+var finished_markers 
+
+var finished_heat_map
+
+var moving_icon = L.divIcon({
+        className: "moving-icon",
+        html: '<i class="Circular big text file icon"></i>',
+        iconSize:null,
+        iconAnchor: [15, 20]
+    });
+
+function getData(){
+  endpoint =  "/FREE_maps/apparatus/"+apparatus_id+"/queue";
+  HEADERS = {
+    "X-CSRFToken": X_CSRFToken,
+    }
+  axios({
+      method: 'get', //you can set what request you want to be
+      url: endpoint,
+      headers: HEADERS,
+  }).then(response => {
+      
+    experiments_array.forEach(element => {
+          map.removeLayer(element);
+    })
+    //execution_path.setLatLngs([apparatus_coord, apparatus_coord])
+
+    experiments_array = []
+    active_exp = false
+    shown_execution_counter = 0
+    response.data.forEach(element => {
+      if (element.client_lat != null && element.client_long != null){
+        shown_execution_counter +=1
+        console.log(element)
+        //var marker = L.marker([element.client_lat, element.clientlong])
+
+        var  marker = L.circleMarker([element.client_lat, element.client_long], 
+                                {radius: 10}
+        )
+        marker.addTo(map);
+        if(element.status == 'Q'){
+          marker.bindTooltip(element.order.toString(), {
+                        permanent: true,
+                        direction: 'center',
+                        className: "my-labels"
+                      });
+        }
+        if(element.status == 'R'){
+            current_exec = element.id
+
+            marker.setStyle({color: '#00ff00'});
+            //execution_path.setLatLngs([apparatus_coord, [element.client_lat, element.client_long]]);
+            execution_path = L.Polyline.Arc(apparatus_coord, [element.client_lat, element.client_long])
+            //execution_path.addTo(map);
+
+
+            if (current_exec != previous_exec){
+              if(previous_exec != -1){
+                anim_path.remove()
+                moving_marker.remove()
+              }
+              anim_path = L.polyline.antPath(execution_path.getLatLngs());
+              anim_path.addTo(map);
+
+            
+              moving_marker = 
+                L.motion.polyline(
+                  execution_path.getLatLngs(), 
+                  {color: "transparent"}, 
+                  {
+                    auto: true,
+                    duration: 3000,
+                    easing: L.Motion.Ease.easeInOutQuart
+                  }, 
+                  {
+                    removeOnEnd: true,
+                    showMarker: true,
+                    icon: moving_icon
+//                    icon: L.divIcon({html: "<b>X</b>", iconSize: L.point(27.5, 24)})
+                  }
+                )
+              moving_marker.on(
+                L.Motion.Event.Ended , 
+                function(){
+                  moving_marker.motionStart()
+                }
+              );
+              moving_marker.addTo(map);
+            }
+            previous_exec = current_exec
+            active_exp = true
+        }
+        experiments_array.push(marker)
+      }
+    });
+    if (active_exp == true){
+        group = L.featureGroup([execution_path])
+    }else{
+      group = L.featureGroup([apparatus_marker].concat(experiments_array))
+      if (execution_path != null){
+        execution_path.remove()
+        execution_path = null
+        moving_marker.remove()
+        anim_path.remove()
+        previous_exec = -1
+      }
+    }
+    map.flyToBounds(group.getBounds(), { duration: 2 });
+    if(shown_execution_counter ==0){
+      map.setView(apparatus_coord, 2, {duration: 4})
+    }
+    setTimeout(getData, 5000);
+  }).catch(error => {
+    experiments_array.forEach(element => {
+          map.removeLayer(element);
+    })
+    setTimeout(getData, 60000);
+  });
+}
+
+
+function getFinishedExecutions(){
+  endpoint = "/FREE_maps/apparatus/"+apparatus_id+"/finishedExecutions"
+  HEADERS = {
+    "X-CSRFToken": X_CSRFToken,
+    }
+  axios({
+      method: 'get', //you can set what request you want to be
+      url: endpoint,
+      headers: HEADERS,
+  }).then(response => {
+    console.log("finished executions")
+    markers_array = []
+    var finished_coords = []
+    response.data.forEach(element => {
+      if (element.client_lat != null && element.client_long != null){
+        console.log(element)
+
+        marker = L.circleMarker([element.client_lat, element.client_long], 
+                                {radius: 2}
+        )
+        markers_array.push(marker)
+        finished_coords.push([element.client_lat, element.client_long, 10])
+      }
+    });
+    map.removeLayer(finished_heat_map);
+    finished_heat_map = L.heatLayer(finished_coords, {radius: 25})
+    finished_heat_map.addTo(map);
+    finished_markers.clearLayers()
+    finished_markers.addLayers(markers_array);
+ 
+    setTimeout(getFinishedExecutions, 5000);
+  }).catch(error => {
+    experiments_array.forEach(element => {
+          map.removeLayer(element);
+    })
+    setTimeout(getFinishedExecutions, 30000);
+  });
+}
+
+
+
+$( document ).ready(function() {
+ 
+  map = L.map('map').setView([0, 0], 2);
+
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 14,
+    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+  }).addTo(map);
+
+  finished_markers = L.markerClusterGroup({
+                    spiderfyOnMaxZoom: false,
+                    showCoverageOnHover: false,
+                    zoomToBoundsOnClick: false,
+                    maxClusterRadius: 40
+                  }); 
+  map.addLayer(finished_markers);
+
+  finished_heat_map = L.heatLayer([], {
+                                      radius: 25,
+                                      minOpacity:25,
+                                  })
+  finished_heat_map.addTo(map);
+
+  apparatus_marker = L.marker(apparatus_coord)
+  apparatus_marker.addTo(map);
+
+  getData();
+  getFinishedExecutions();
+
+
+
+  //execution_path = L.polyline([apparatus_coord, apparatus_coord]);
+  //execution_path.addTo(map);
+/*
+var stepIcon = L.icon({
+    iconUrl: 'graphic/yellow-circle.png', // the background image you want
+    iconSize: [40, 40], // size of the icon
+});
+var marker = new L.marker([39.5, 77.3], {icon:stepIcon});
+
+*/
+
+
+
+
+});
+</script>
+{% endblock %}
