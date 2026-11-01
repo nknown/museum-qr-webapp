@@ -33,7 +33,9 @@
         </tbody>
     </table>
 
+    {% if can_edit_piece %}
     <a class="ui button" href="{% url 'main_app:piece-update' piece.pk %}">{% trans "Edit" %}</a>
-    <a class="ui button" href="{% url 'main_app:exhibition-update' piece.exhibition.pk %}">{% trans "Back to exhibition" %}</a>
+    {% endif %}
+    <a class="ui button" href="{% url 'main_app:visitor-history' %}">{% trans "My visit" %}</a>
 </div>
 {% endblock %}

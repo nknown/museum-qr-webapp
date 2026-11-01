@@ -1,9 +1,10 @@
-{% load wagtailcore_tags %}
+{% load wagtailcore_tags static %}
 <!doctype html>
 <html>
 <head>
   <meta charset="utf-8">
-  <title>{{ page.title }}</title>
+  <title>MIYP | {{ page.title }}</title>
+  <link rel="shortcut icon" href="{% static 'wagtailadmin/images/favicon.ico' %}">
 </head>
 <body>
   <div>{{ page.description|richtext }}</div>

@@ -1,0 +1,41 @@
+{% extends "main_app/layout/base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="right floated sixteen wide column" id="content">
+    <div class="ui centered grid">
+        <div class="row">
+            <div class="ui sixteen wide column">
+                <div class="ui header segment">
+                    <h2>{% trans "Add pieces in bulk" %}</h2>
+                    <p>{% trans "Exhibition" %}: {{ exhibition.title }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="ui ten wide column">
+                <div class="ui segment">
+                    <form class="ui form{% if form.errors %} error{% endif %}" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {% if form.non_field_errors %}
+                        <div class="ui error message">{{ form.non_field_errors }}</div>
+                        {% endif %}
+                        <div class="field{% if form.spreadsheet.errors %} error{% endif %}">
+                            {{ form.spreadsheet.label_tag }}
+                            {{ form.spreadsheet }}
+                            {% if form.spreadsheet.help_text %}
+                            <div class="ui pointing label">{{ form.spreadsheet.help_text }}</div>
+                            {% endif %}
+                            {% if form.spreadsheet.errors %}
+                            <div class="ui error message">{{ form.spreadsheet.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <button class="ui primary button" type="submit">{% trans "Upload" %}</button>
+                        <a class="ui button" href="{% url 'main_app:exhibition-update' exhibition.pk %}">{% trans "Back" %}</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

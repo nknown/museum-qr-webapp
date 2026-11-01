@@ -63,12 +63,118 @@
     margin: 1rem 0 0;
   }
 
+  .mip-user-device-media,
+  .mip-on-site-media {
+    background: #f3f4f5;
+    border: 1px solid rgba(34, 36, 38, 0.15);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mip-user-device-media {
+    aspect-ratio: 1 / 1;
+  }
+
+  .mip-user-device-column {
+    max-width: min(100%, 680px);
+  }
+
+  .mip-on-site-media {
+    aspect-ratio: 1 / 1;
+    min-height: 25vh;
+  }
+
+  .mip-on-site-media-widescreen {
+    min-height: 0;
+  }
+
+  .mip-on-site-media-standard {
+    aspect-ratio: 1 / 1;
+    min-height: 0;
+  }
+
+  .mip-user-device-media img,
+  .mip-user-device-media video,
+  .mip-user-device-media iframe,
+  .mip-on-site-media img,
+  .mip-on-site-media video,
+  .mip-on-site-media iframe {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    margin: 0;
+    border-radius: 0;
+    border: 0;
+  }
+
+  .mip-empty-media {
+    color: rgba(0, 0, 0, 0.5);
+    font-weight: 700;
+  }
+
+  .mip-slide-body,
+  .mip-slide-copy {
+    line-height: 1.55;
+    text-align: left;
+    overflow-wrap: anywhere;
+    word-break: normal;
+    max-width: 100%;
+  }
+
+  .mip-slide-body img,
+  .mip-slide-copy img,
+  .mip-slide-body video,
+  .mip-slide-copy video,
+  .mip-slide-body iframe,
+  .mip-slide-copy iframe,
+  .mip-slide-body table,
+  .mip-slide-copy table {
+    max-width: 100%;
+    table-layout: fixed;
+  }
+
+  .mip-two-column-text {
+    column-count: 2;
+    column-gap: 2rem;
+  }
+
+  .mip-on-site-standard-media-column {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .mip-standard-support-copy {
+    line-height: 1.45;
+  }
+
+  .mip-standard-support-copy img,
+  .mip-standard-support-copy video,
+  .mip-standard-support-copy iframe {
+    display: none;
+  }
+
+  .mip-standard-main-copy {
+    column-count: 2;
+    column-gap: 2rem;
+  }
+
+  @media (max-width: 767px) {
+    .mip-two-column-text,
+    .mip-standard-main-copy {
+      column-count: 1;
+    }
+  }
+
   .presentation-overlay {
     position: absolute;
     inset: 0;
     display: grid;
     grid-template-columns: 1fr 1fr;
     pointer-events: none;
+    z-index: 3;
   }
 
   .presentation-overlay button {
@@ -88,68 +194,154 @@
     margin-top: 0.75rem;
     opacity: 0.72;
   }
+
+  .on-site-user-device-qr {
+    position: absolute;
+    right: 1.25rem;
+    bottom: 1.25rem;
+    z-index: 4;
+    display: block;
+    width: 18rem;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    color: #000000;
+    text-align: center;
+    text-decoration: none;
+  }
+
+  .on-site-user-device-qr__code,
+  .on-site-user-device-qr__code svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
 </style>
 
-<div class="presentation-shell" data-presentation-type="{{ presentation_type }}">
+<div class="presentation-shell" data-presentation-type="{{ presentation_type }}" data-presentation-template="{{ active_presentation_template|default:'built-in' }}">
+  {% if is_user_device_presentation %}
+    {% with favorite_kind="Exhibition" favorite_name=exhibition.title favorite_id=exhibition.pk %}
+      {% include "main_app/models/presentation/_user_device_controls.html" %}
+    {% endwith %}
+  {% endif %}
   <div class="presentation-frame">
     <div class="presentation-header">
       <div>
-        <h1 class="presentation-title">{{ exhibition.title }}</h1>
-        <div class="presentation-meta">
+        <h1 class="presentation-title">
           {% if is_user_device_presentation %}
-            Click left for previous, right for next.
+            {% if exhibition.museum %}
+              {{ exhibition.museum.title }}
+            {% else %}
+              {% trans "Not currently on display" %}
+            {% endif %}
           {% else %}
+            {{ exhibition.title }}
+          {% endif %}
+        </h1>
+        <div class="presentation-meta">
+          {% if not is_user_device_presentation %}
             Auto-advancing every {{ presentation_timer_seconds }} seconds.
           {% endif %}
         </div>
       </div>
-      <div class="presentation-meta">{{ presentation_pages|length }} pages</div>
+      <div class="presentation-meta">{{ presentation_page_count }} pages</div>
     </div>
 
     <div class="presentation-stage" id="presentation-stage">
-      {% for slide in presentation_pages %}
-        <section class="presentation-slide{% if forloop.first %} is-active{% endif %}" data-slide-index="{{ forloop.counter0 }}" data-time-seconds="{{ slide.time_seconds|default:5 }}">
-          <h2>{{ slide.title }}</h2>
-          {% if slide.hero_image %}
-            {% image slide.hero_image fill-1200x675 as hero %}
-            <img src="{{ hero.url }}" alt="{{ slide.title }}">
+      {% include "main_app/models/presentation/_appearance.html" %}
+      {% if is_user_device_presentation %}
+        <section class="presentation-slide is-active" data-slide-index="0" data-time-seconds="5">
+          <h2 style="margin-top: 0;">{{ exhibition.title }}</h2>
+          <div style="margin-bottom: 1.5rem;">
+            <h3 style="margin: 0.5rem 0;">{% trans "Description" %}</h3>
+            <p style="margin: 0;">{{ exhibition.description }}</p>
+          </div>
+          {% if featured_pieces %}
+            <div>
+              <p style="margin: 0;">
+                {% if featured_pieces|length == 1 %}
+                  This exhibition is solely dedicated to {{ featured_pieces.0 }}.
+                {% elif featured_pieces|length == 2 %}
+                  In here you'll be able to visit pieces like {{ featured_pieces.0 }} and {{ featured_pieces.1 }}.
+                {% else %}
+                  In here you'll be able to visit pieces like {{ featured_pieces.0 }}, {{ featured_pieces.1 }} and {{ featured_pieces.2 }}.
+                {% endif %}
+              </p>
+            </div>
           {% endif %}
-          <div>{{ slide.body|richtext }}</div>
+        </section>
+      {% endif %}
+      {% for slide in presentation_pages %}
+        <section class="presentation-slide{% if forloop.first and not is_user_device_presentation %} is-active{% endif %}" data-slide-index="{% if is_user_device_presentation %}{{ forloop.counter }}{% else %}{{ forloop.counter0 }}{% endif %}" data-track-index="{{ forloop.counter0 }}" data-time-seconds="{{ slide.time_seconds|default:5 }}">
+          {% if active_presentation_template == "fomantic_user_device_v1" %}
+            {% include "main_app/models/presentation/_user_device_slide.html" %}
+          {% elif active_presentation_template == "fomantic_on_site_widescreen_v1" %}
+            {% include "main_app/models/presentation/_on_site_widescreen_slide.html" %}
+          {% elif active_presentation_template == "fomantic_on_site_standard_v1" or active_presentation_template == "fomantic_on_site_v1" %}
+            {% include "main_app/models/presentation/_on_site_slide.html" %}
+          {% else %}
+            {% include "main_app/models/presentation/_default_slide.html" %}
+          {% endif %}
         </section>
       {% empty %}
-        <section class="presentation-slide is-active">
+        <section class="presentation-slide{% if not is_user_device_presentation %} is-active{% endif %}">
           <h2>{% trans "No presentation pages yet." %}</h2>
         </section>
       {% endfor %}
 
-      {% if presentation_pages %}
+      {% if presentation_page_count %}
       <div class="presentation-overlay" aria-hidden="true">
         <button type="button" data-direction="prev" aria-label="Previous slide"></button>
         <button type="button" data-direction="next" aria-label="Next slide"></button>
       </div>
+      {% endif %}
+      {% if not is_user_device_presentation %}
+        {% include "main_app/models/presentation/_on_site_qr.html" %}
       {% endif %}
     </div>
 
   </div>
 </div>
 
+{% include "main_app/models/presentation/_promote_richtext_media.html" %}
+
 <script>
   (function () {
     const shell = document.querySelector('.presentation-shell');
     const slides = Array.from(document.querySelectorAll('.presentation-slide'));
+    const slideTrackingUrl = "{{ slide_tracking_url|default:''|escapejs }}";
     if (!shell || !slides.length) {
       return;
     }
 
     let currentIndex = 0;
     let timerId = null;
+    let slideTrackingTimerId = null;
+    let slideTrackingInFlight = false;
+    let lastQueuedSlideIndex = null;
+    const pendingSlideEvents = [];
+    const maxTrackingBatchSize = 20;
     const isUserDevice = shell.dataset.presentationType === 'user_device';
+    const favoriteButton = document.querySelector('[data-favorite-button]');
+    const completionKind = favoriteButton ? (favoriteButton.dataset.favoriteKind || 'presentation') : 'presentation';
+    const completionName = favoriteButton ? (favoriteButton.dataset.favoriteName || '') : '';
+    const completionKey = `mip-presentation-complete:${window.location.pathname}`;
+    const completionNotifier = window.Notyf ? new window.Notyf({
+      duration: 10000,
+      dismissible: false,
+      position: { x: 'right', y: 'top' },
+    }) : null;
 
     function renderSlide(nextIndex) {
-      currentIndex = (nextIndex + slides.length) % slides.length;
+      if (isUserDevice) {
+        currentIndex = Math.min(Math.max(nextIndex, 0), slides.length - 1);
+      } else {
+        currentIndex = (nextIndex + slides.length) % slides.length;
+      }
       slides.forEach((slide, index) => {
         slide.classList.toggle('is-active', index === currentIndex);
       });
+      trackActiveSlide();
       if (!isUserDevice) {
         scheduleAutoAdvance();
       }
@@ -167,15 +359,114 @@
     }
 
     function goNext() {
+      if (isUserDevice && currentIndex >= slides.length - 1) {
+        acknowledgeCompletion();
+        return;
+      }
       renderSlide(currentIndex + 1);
     }
 
     function goPrevious() {
+      if (isUserDevice && currentIndex <= 0) {
+        return;
+      }
       renderSlide(currentIndex - 1);
+    }
+
+    function acknowledgeCompletion() {
+      if (window.sessionStorage.getItem(completionKey)) {
+        return;
+      }
+      window.sessionStorage.setItem(completionKey, 'seen');
+      if (!completionNotifier) {
+        return;
+      }
+      const itemLabel = completionName ? `${completionKind} "${completionName}"` : completionKind;
+      completionNotifier.success(`{% trans 'Added to your menu' %}: ${itemLabel} {% trans 'has been added to your menu so you can revisit it later.' %}`);
+    }
+
+    function trackActiveSlide() {
+      if (!slideTrackingUrl) {
+        return;
+      }
+      const activeSlide = slides[currentIndex];
+      const slideIndex = activeSlide.dataset.slideIndex;
+      if (slideIndex === undefined || slideIndex === '') {
+        return;
+      }
+      const numericSlideIndex = Number(slideIndex);
+      if (!Number.isInteger(numericSlideIndex) || numericSlideIndex === lastQueuedSlideIndex) {
+        return;
+      }
+      lastQueuedSlideIndex = numericSlideIndex;
+      pendingSlideEvents.push({
+        slide_index: numericSlideIndex,
+        occurred_at: new Date().toISOString(),
+      });
+      scheduleSlideTrackingFlush(pendingSlideEvents.length >= maxTrackingBatchSize);
+    }
+
+    function csrfToken() {
+      const match = document.cookie.match(/(?:^|; )csrftoken=([^;]+)/);
+      return match ? decodeURIComponent(match[1]) : '';
+    }
+
+    function trackingDelay(urgent) {
+      return urgent
+        ? 250 + Math.random() * 500
+        : 2500 + Math.random() * 3500;
+    }
+
+    function scheduleSlideTrackingFlush(urgent = false) {
+      if (slideTrackingTimerId || slideTrackingInFlight || !pendingSlideEvents.length) {
+        return;
+      }
+      slideTrackingTimerId = window.setTimeout(() => {
+        slideTrackingTimerId = null;
+        flushSlideTracking();
+      }, trackingDelay(urgent));
+    }
+
+    function flushSlideTracking(keepalive = false) {
+      if (slideTrackingInFlight || !pendingSlideEvents.length) {
+        return;
+      }
+      if (slideTrackingTimerId) {
+        window.clearTimeout(slideTrackingTimerId);
+        slideTrackingTimerId = null;
+      }
+
+      const batch = pendingSlideEvents.splice(0, maxTrackingBatchSize);
+      slideTrackingInFlight = true;
+      fetch(slideTrackingUrl, {
+        method: 'POST',
+        credentials: 'same-origin',
+        keepalive,
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken(),
+        },
+        body: JSON.stringify({ events: batch }),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`Slide tracking failed with status ${response.status}`);
+          }
+        })
+        .catch(() => {
+          pendingSlideEvents.unshift(...batch);
+        })
+        .finally(() => {
+          slideTrackingInFlight = false;
+          scheduleSlideTrackingFlush(pendingSlideEvents.length >= maxTrackingBatchSize);
+        });
     }
 
     if (isUserDevice) {
       document.addEventListener('click', (event) => {
+        if (!shell.contains(event.target)) {
+          return;
+        }
         const bounds = shell.getBoundingClientRect();
         const clickX = event.clientX - bounds.left;
         if (clickX < bounds.width / 2) {
@@ -187,10 +478,18 @@
 
       document.addEventListener('keydown', (event) => {
         if (event.key === 'ArrowLeft') {
+          event.preventDefault();
           goPrevious();
         }
         if (event.key === 'ArrowRight') {
+          event.preventDefault();
           goNext();
+        }
+      });
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') {
+          flushSlideTracking(true);
         }
       });
     } else {
@@ -207,6 +506,7 @@
         }
       });
     });
+
   }());
 </script>
 {% endblock %}

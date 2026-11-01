@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 {% load static %}
 {% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
 
-<html lang="pt">
+<html lang="{{ LANGUAGE_CODE|default:'en' }}">
     <head>
         <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
         <meta http-equiv="Pragma" content="no-cache" />
@@ -10,22 +11,19 @@
         <meta charset="utf-8" />
         <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2, user-scalable=no" />
-        <meta name="description" content="Template for ELAB app" />
-        <meta name="keywords" content="ELab layout, template, web site" />
+        <meta name="description" content="MIYP - Museum in Your Pocket" />
+        <meta name="keywords" content="MIYP, museums, exhibitions, cultural heritage" />
         <meta name="author" content="José Veiga" />
         <meta name="theme-color" content="#ffffff" />
-        <title>{% trans 'FREE' %} | {% block title %} {% endblock %}</title>
+        <title>MIYP | {% block title %}{% endblock %}</title>
 
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css" type="text/css"/>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/components/accordion.min.css">
-        <link rel="stylesheet" href="https://cdn.datatables.net/1.11.3/css/dataTables.semanticui.min.css">
-        <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.2.9/css/responsive.semanticui.min.css">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables.net-buttons-se/1.5.3/buttons.semanticui.min.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fomantic-ui@2.9.3/dist/semantic.min.css" type="text/css"/>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intro.js/minified/introjs.min.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
         <link rel="stylesheet" href="{% static 'main_app/css/style.css' %}">
 
-        <link rel="shortcut icon" type="image/png" href="">
-        <link rel="shortcut icon" href="{% static 'main_app/images/faviconElab.ico' %}">
-        <script src="{% url 'javascript-catalog' %}"></script>
+        <link rel="shortcut icon" href="{% static 'wagtailadmin/images/favicon.ico' %}">
+        {% include 'main_app/layout/presentation_scripts.html' %}
 
         <style>
           html, body {
@@ -47,12 +45,12 @@
         </style>
 
         {% block headscript %}{% endblock %}
-        {% include 'main_app/layout/scripts.html' %}
         {% block head %}{% endblock %}
     </head>
     <body>
         {% block layout %}{% endblock %}
         {% block content %}{% endblock %}
+        {% include 'main_app/layout/auth_notyf.html' %}
     </body>
     {% block script %}{% endblock %}
 </html>

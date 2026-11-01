@@ -7,6 +7,130 @@
 
 
 
+<style>
+    .piece-hover-preview {
+        display: none;
+        position: fixed;
+        z-index: 9999;
+        padding: 0.35rem;
+        background: #fff;
+        border: 1px solid rgba(34, 36, 38, 0.15);
+        box-shadow: 0 2px 8px rgba(34, 36, 38, 0.18);
+        pointer-events: none;
+    }
+
+    .piece-hover-preview img {
+        display: block;
+        width: 180px;
+        height: 180px;
+        object-fit: cover;
+    }
+
+    .piece-hover-preview-empty {
+        width: 180px;
+        min-height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: rgba(0, 0, 0, 0.55);
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .presentation-button-column {
+        display: flex;
+        flex-direction: column;
+        gap: 0.85rem;
+    }
+
+    .presentation-button-column .ui.button {
+        margin: 0;
+        width: 100%;
+    }
+
+    .exhibition-form-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .exhibition-form-actions-left {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        flex-wrap: wrap;
+    }
+
+    .exhibition-form-actions-right {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .exhibition-qr-toggle {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        margin: 0;
+        font-weight: 700;
+    }
+</style>
+
+<div class="piece-hover-preview" id="piece-hover-preview" aria-hidden="true"></div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const preview = document.getElementById('piece-hover-preview');
+        if (!preview) {
+            return;
+        }
+
+        function movePreview(event) {
+            const offset = 18;
+            const previewHeight = preview.offsetHeight || 0;
+            const belowTop = event.clientY + offset;
+            const aboveTop = event.clientY - previewHeight - offset;
+            const wouldOverflowBottom = belowTop + previewHeight > window.innerHeight;
+
+            preview.style.left = `${event.clientX + offset}px`;
+            preview.style.top = `${wouldOverflowBottom ? Math.max(offset, aboveTop) : belowTop}px`;
+        }
+
+        document.querySelectorAll('.piece-preview-anchor').forEach(function (link) {
+            link.addEventListener('mouseenter', function (event) {
+                const previewUrl = link.dataset.previewUrl;
+                const previewName = link.dataset.previewName || '';
+                preview.replaceChildren();
+                if (previewUrl) {
+                    const image = document.createElement('img');
+                    image.src = previewUrl;
+                    image.alt = previewName;
+                    preview.appendChild(image);
+                } else {
+                    const empty = document.createElement('div');
+                    empty.className = 'piece-hover-preview-empty';
+                    empty.textContent = '{% trans "No image assigned" %}';
+                    preview.appendChild(empty);
+                }
+                movePreview(event);
+                preview.style.display = 'block';
+            });
+
+            link.addEventListener('mousemove', movePreview);
+
+            link.addEventListener('mouseleave', function () {
+                preview.style.display = 'none';
+                preview.innerHTML = '';
+            });
+        });
+    });
+</script>
+
+
+
     <div class="right floated sixteen wide  column" id="content">
         <div class="ui centered grid">
             <div class="row">
@@ -29,10 +153,24 @@
 
 
                                 <div class="ui divider"></div>
-                                <button class="ui primary button" type="submit">Submit</button>
-                                {% if form.instance.pk %}
-                                <a class="ui button" href="{% url 'main_app:exhibitions-list' %}">{% trans "Back" %}</a>
-                                {% endif %}
+                                <div class="exhibition-form-actions">
+                                    <div class="exhibition-form-actions-left">
+                                        <button class="ui primary button" type="submit">Submit</button>
+                                        {% if form.instance.pk %}
+                                        <a class="ui button" href="{% url 'main_app:exhibitions-list' %}">{% trans "Back" %}</a>
+                                        <a class="ui negative button" href="{% url 'main_app:exhibition-delete' form.instance.pk %}">{% trans "Remove" %}</a>
+                                        {% endif %}
+                                    </div>
+                                    {% if form.instance.pk %}
+                                    <div class="exhibition-form-actions-right">
+                                        <label class="exhibition-qr-toggle">
+                                            <input type="checkbox" name="show_on_site_qr" value="1"{% if form.instance.show_on_site_qr %} checked{% endif %}>
+                                            <span>{% trans "Show OnSite QR" %}</span>
+                                        </label>
+                                        <a class="ui button" href="{% url 'main_app:exhibition-user-device-qrs' form.instance.pk %}">{% trans "User Device QRs" %}</a>
+                                    </div>
+                                    {% endif %}
+                                </div>
 
                         </form>
 
@@ -41,27 +179,35 @@
                     {% if form.instance.pk %}
                     <div class="ui segment">
                         <h4>{% trans "Presentations" %}</h4>
-                        <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-                            {% if exhibition_presentations.on_site %}
-                            <a class="ui button" href="{{ exhibition_presentations.on_site }}">{% trans "Edit Onsite Presentation" %}</a>
-                            {% else %}
-                            <button class="ui button" disabled>{% trans "Edit Onsite Presentation" %}</button>
-                            {% endif %}
-                            {% if exhibition_presentations.user_device %}
-                            <a class="ui button" href="{{ exhibition_presentations.user_device }}">{% trans "Edit User Device Presentation" %}</a>
-                            {% else %}
-                            <button class="ui button" disabled>{% trans "Edit User Device Presentation" %}</button>
-                            {% endif %}
-                            {% if exhibition_presentations.on_site %}
-                            <a class="ui button" href="{% url 'main_app:exhibition-presentation' form.instance.pk 'on_site' %}">{% trans "View Onsite Presentation" %}</a>
-                            {% else %}
-                            <button class="ui button" disabled>{% trans "View Onsite Presentation" %}</button>
-                            {% endif %}
-                            {% if exhibition_presentations.user_device %}
-                            <a class="ui button" href="{% url 'main_app:exhibition-presentation' form.instance.pk 'user_device' %}">{% trans "View User Device Presentation" %}</a>
-                            {% else %}
-                            <button class="ui button" disabled>{% trans "View User Device Presentation" %}</button>
-                            {% endif %}
+                        <div class="ui two column stackable grid">
+                            <div class="column">
+                                <div class="presentation-button-column">
+                                    {% if exhibition_presentations.on_site %}
+                                    <a class="ui button" href="{{ exhibition_presentations.on_site }}">{% trans "Edit Onsite Presentation" %}</a>
+                                    {% else %}
+                                    <button class="ui button" disabled>{% trans "Edit Onsite Presentation" %}</button>
+                                    {% endif %}
+                                    {% if exhibition_presentations.on_site %}
+                                    <a class="ui button" href="{% url 'main_app:exhibition-presentation' form.instance.pk 'on_site' %}">{% trans "View Onsite Presentation" %}</a>
+                                    {% else %}
+                                    <button class="ui button" disabled>{% trans "View Onsite Presentation" %}</button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="column">
+                                <div class="presentation-button-column">
+                                    {% if exhibition_presentations.user_device %}
+                                    <a class="ui button" href="{{ exhibition_presentations.user_device }}">{% trans "Edit User Device Presentation" %}</a>
+                                    {% else %}
+                                    <button class="ui button" disabled>{% trans "Edit User Device Presentation" %}</button>
+                                    {% endif %}
+                                    {% if exhibition_presentations.user_device %}
+                                    <a class="ui button" href="{% url 'main_app:exhibition-public-presentation' form.instance.public_id %}">{% trans "View User Device Presentation" %}</a>
+                                    {% else %}
+                                    <button class="ui button" disabled>{% trans "View User Device Presentation" %}</button>
+                                    {% endif %}
+                                </div>
+                            </div>
                         </div>
                     </div>
                                 <div class="row">
@@ -71,6 +217,9 @@
                                                 <h3 class="ui blue ribbon icon label">{% trans "list of your Pieces" %}</h3>
                                                 <a class="ui right floated button" href="{% url 'main_app:piece-create' %}?exhibition_id={{ form.instance.pk }}">
                                                     {% trans "Add piece" %}
+                                                </a>
+                                                <a class="ui right floated button" href="{% url 'main_app:exhibition-add-pieces' form.instance.pk %}">
+                                                    {% trans "Add pieces in bulk" %}
                                                 </a>
                                                 {% if has_piece_attributes %}
                                                 <a class="ui right floated button" href="{% url 'main_app:exhibition-attributes-create' form.instance.pk %}">

@@ -94,7 +94,7 @@ pip freeze > REQUIREMENTS.txt
 
 ### Internationalisation
 
-Configure available languages for translation by setting `LANGUAGES` constant in `root_files/settings.py`. The template is:
+Configure available languages for translation by setting the `LANGUAGES` constant in `MIYP/settings.py`. The template is:
 ```
 LANGUAGES = [
     ('en', _('English')),

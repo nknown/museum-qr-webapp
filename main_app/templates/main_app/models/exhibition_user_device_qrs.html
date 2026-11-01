@@ -1,0 +1,110 @@
+{% load i18n static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MIYP | {{ exhibition.title }} - User Device QRs</title>
+  <link rel="shortcut icon" href="{% static 'wagtailadmin/images/favicon.ico' %}">
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      background: #ffffff;
+      color: #000000;
+      font-family: Arial, sans-serif;
+    }
+
+    .qr-sheet {
+      padding: 1.25rem;
+    }
+
+    .qr-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      gap: 1.25rem;
+    }
+
+    .qr-card {
+      width: 18rem;
+      break-inside: avoid;
+      page-break-inside: avoid;
+      text-align: center;
+    }
+
+    .qr-code,
+    .qr-code svg {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .qr-title {
+      margin-top: 0.5rem;
+      font-size: 1rem;
+      font-weight: 700;
+      line-height: 1.2;
+      overflow-wrap: anywhere;
+    }
+
+    .qr-kind {
+      margin-top: 0.15rem;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+    }
+
+    .qr-actions {
+      padding: 0 1.25rem 1.25rem;
+    }
+
+    .qr-download-button {
+      border: 1px solid #000000;
+      background: #ffffff;
+      color: #000000;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 700;
+      padding: 0.7rem 1rem;
+    }
+
+    @media print {
+      .qr-actions {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="qr-sheet" id="qr-sheet">
+    <div class="qr-row">
+      {% for item in qr_items %}
+      <section class="qr-card">
+        <div class="qr-code">{{ item.qr_svg|safe }}</div>
+        <div class="qr-title">{{ item.title }}</div>
+        <div class="qr-kind">{{ item.kind }}</div>
+      </section>
+      {% endfor %}
+    </div>
+  </main>
+  <div class="qr-actions">
+    <button class="qr-download-button" type="button" id="download-qrs">{% trans "Download" %}</button>
+  </div>
+
+  <script>
+    document.getElementById('download-qrs').addEventListener('click', function () {
+      const html = '<!doctype html>\\n' + document.documentElement.outerHTML;
+      const blob = new Blob([html], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = '{{ exhibition.title|slugify|default:"exhibition" }}-user-device-qrs.html';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    });
+  </script>
+</body>
+</html>

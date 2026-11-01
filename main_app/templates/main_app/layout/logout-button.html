@@ -1,4 +1,11 @@
-<form method="post" action="{% url 'main_app:logout' %}">
+{% load i18n %}
+<form method="post" action="{% url 'main_app:logout' %}" class="item" style="margin: 0; padding: 0;">
     {% csrf_token %}
-    <button type="submit">logout</button>
+    <button
+        type="submit"
+        style="border: 0; background: transparent; cursor: pointer; font: inherit; padding: 0.78571429em 1.14285714em; text-align: left; width: 100%;"
+    >
+        <i class="sign out alternate icon"></i>
+        {% trans "Logout" %}
+    </button>
 </form>

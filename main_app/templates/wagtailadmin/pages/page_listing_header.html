@@ -1,0 +1,34 @@
+{% extends 'wagtailadmin/shared/headers/slim_header.html' %}
+{% load wagtailadmin_tags i18n %}
+
+{% block title %}
+    {% if parent_page.is_root %}
+        <h1 class="w-text-18 w-font-bold w-my-0">MIYP - Content</h1>
+    {% else %}
+        {{ block.super }}
+    {% endif %}
+{% endblock %}
+
+{% block breadcrumbs %}
+    {% if not parent_page.is_root %}
+        {% page_breadcrumbs parent_page 'wagtailadmin_explore' url_root_name='wagtailadmin_explore_root' %}
+    {% endif %}
+{% endblock %}
+
+{% block actions %}
+    {% page_permissions parent_page as parent_page_perms %}
+    {% if parent_page_perms.can_add_subpage %}
+        {% trans 'Add child page' as add_child_page_str %}
+        <a href="{% url "wagtailadmin_pages:add_subpage" parent_page.id %}" class="w-header-button button" data-controller="w-tooltip" data-w-tooltip-content-value="{{ add_child_page_str }}" aria-label="{{ add_child_page_str }}">{% icon name="plus" %}</a>
+    {% endif %}
+    {% page_header_buttons parent_page user=request.user view_name="index" %}
+{% endblock %}
+
+{% block toggles %}
+    {{ block.super }}
+    {% include "wagtailadmin/shared/page_status_tag_new.html" with page=parent_page %}
+{% endblock %}
+
+{% block side_panels %}
+    {% include "wagtailadmin/shared/side_panels.html" with in_explorer=True %}
+{% endblock side_panels %}

@@ -5,7 +5,7 @@ from main_app.models import *
 import json
 import decimal
 from jsonschema import validate, ValidationError as JSONValidationError
-from root_files import settings
+from MIYP import settings
 from django.shortcuts import get_object_or_404
 
 from main_app.views.permissions import ApparatusOnlyAccess
@@ -182,4 +182,3 @@ class ExecutionStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Execution
         fields = ['status']
-
