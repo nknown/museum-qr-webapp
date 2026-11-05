@@ -32,7 +32,6 @@ urlpatterns = [
     path('summernote/', include('django_summernote.urls')),
     path('', include('social_django.urls', namespace='social')),
     path('', include('main_app.userAdmin.urls')),
-    path('MIYP_maps/', include('MIYP_maps.urls'), name='MIYP_maps'),
     path('cms/', RedirectView.as_view(url='/cms/pages/', permanent=False)),
     path('cms/', include(wagtailadmin_urls)),
     path('documents/', include(wagtaildocs_urls)),

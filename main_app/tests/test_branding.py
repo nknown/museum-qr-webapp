@@ -51,3 +51,12 @@ class BrandingTests(TestCase):
         self.assertContains(response, 'Hi, GoogleName', count=2)
         self.admin.refresh_from_db()
         self.assertEqual(self.admin.username, original_username)
+
+    def test_authenticated_navigation_has_no_boilerplate_sponsors(self):
+        self.client.force_login(self.admin)
+
+        response = self.client.get('/')
+
+        self.assertNotContains(response, 'Sponsors')
+        self.assertNotContains(response, 'Patrocínio')
+        self.assertNotContains(response, 'Republica de Portugal')

@@ -244,6 +244,117 @@ class RoleWorkflowTests(TestCase):
         self.piece.refresh_from_db()
         self.assertEqual(self.piece.exhibition, self.exhibition)
 
+    def test_piece_can_be_added_from_managed_exhibition_with_matching_attributes(self):
+        target = self.exhibit('Clone target', self.museum)
+        target.pieces_attributes = ['Name', 'Material', 'Period']
+        target.save(update_fields=['pieces_attributes'])
+        self.piece.attributes = [
+            {'name': 'Name', 'value': 'Hidden piece'},
+            {'name': 'material', 'value': 'Bronze'},
+            {'name': 'Maker', 'value': 'Unknown maker'},
+        ]
+        self.piece.save(update_fields=['attributes'])
+        source_on_site = self.piece.slideshow_page.get_children().get(slug='on_site').specific
+        legacy_slide = SlideshowSlidePage(
+            title='Legacy details',
+            slug='legacy-details',
+            body='<p>Legacy presentation body</p>',
+            live=False,
+        )
+        source_on_site.add_child(instance=legacy_slide)
+        legacy_slide.save_revision()
+        self.login(self.curator)
+        create_url = f"{reverse('main_app:piece-create')}?exhibition_id={target.pk}"
+
+        selection = self.client.get(create_url)
+        self.assertContains(selection, 'Add piece from exhibition...')
+        self.assertContains(selection, 'Keep legacy presentation contents and hierarchy')
+        self.assertContains(selection, self.exhibition.title)
+        self.assertContains(selection, 'Hidden piece')
+
+        response = self.client.post(create_url, {
+            'clone_piece_submit': '1',
+            'source_exhibition': self.exhibition.pk,
+            'source_piece': self.piece.pk,
+        })
+
+        self.assertRedirects(
+            response,
+            reverse('main_app:exhibition-update', args=[target.pk]),
+            fetch_redirect_response=False,
+        )
+        clone = target.pieces.get()
+        self.assertEqual(clone.attributes, [
+            {'name': 'Name', 'value': 'Hidden piece'},
+            {'name': 'Material', 'value': 'Bronze'},
+            {'name': 'Period', 'value': '?'},
+        ])
+        self.assertIsNotNone(clone.slideshow_page)
+        self.assertTrue(clone.slideshow_page.get_children().filter(slug='on_site').exists())
+        self.assertTrue(clone.slideshow_page.get_children().filter(slug='user_device').exists())
+        self.assertFalse(
+            clone.slideshow_page.get_descendants().filter(title='Legacy details').exists()
+        )
+
+    def test_piece_clone_can_keep_presentation_contents_and_hierarchy_as_drafts(self):
+        target = self.exhibit('Presentation clone target', self.museum)
+        target.pieces_attributes = ['Name']
+        target.save(update_fields=['pieces_attributes'])
+        source_on_site = self.piece.slideshow_page.get_children().get(slug='on_site').specific
+        legacy_slide = SlideshowSlidePage(
+            title='Legacy hierarchy slide',
+            slug='legacy-hierarchy-slide',
+            body='<p>Preserved legacy content</p>',
+            live=False,
+        )
+        source_on_site.add_child(instance=legacy_slide)
+        legacy_slide.save_revision()
+        self.login(self.curator)
+        create_url = f"{reverse('main_app:piece-create')}?exhibition_id={target.pk}"
+
+        response = self.client.post(create_url, {
+            'clone_piece_submit': '1',
+            'source_exhibition': self.exhibition.pk,
+            'source_piece': self.piece.pk,
+            'keep_presentation': 'on',
+        })
+
+        self.assertEqual(response.status_code, 302)
+        clone = target.pieces.get()
+        copied_slide = (
+            clone.slideshow_page.get_descendants()
+            .get(title='Legacy hierarchy slide')
+            .specific
+        )
+        self.assertEqual(copied_slide.body, '<p>Preserved legacy content</p>')
+        self.assertEqual(copied_slide.get_parent().slug, 'on_site')
+        self.assertNotEqual(copied_slide.pk, legacy_slide.pk)
+        self.assertTrue(
+            all(
+                not page.live
+                for page in clone.slideshow_page.get_descendants(inclusive=True)
+            )
+        )
+
+    def test_piece_clone_rejects_exhibitions_outside_curator_museum(self):
+        foreign_piece = Piece.objects.create(
+            exhibition=self.foreign,
+            attributes=[{'name': 'Name', 'value': 'Foreign piece'}],
+        )
+        self.login(self.curator)
+        create_url = f"{reverse('main_app:piece-create')}?exhibition_id={self.exhibition.pk}"
+        original_count = self.exhibition.pieces.count()
+
+        response = self.client.post(create_url, {
+            'clone_piece_submit': '1',
+            'source_exhibition': self.foreign.pk,
+            'source_piece': foreign_piece.pk,
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context['clone_form'].errors)
+        self.assertEqual(self.exhibition.pieces.count(), original_count)
+
     def test_interactive_content_is_rendered_in_visitor_presentation(self):
         folder = self.piece.slideshow_page.get_children().get(slug='user_device')
         slide = folder.get_children().first().specific

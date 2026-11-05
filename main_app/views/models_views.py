@@ -1169,6 +1169,45 @@ class PieceForm(PieceDynamicForm):
     pass
 
 
+class PieceCloneForm(forms.Form):
+    source_exhibition = forms.ModelChoiceField(
+        label=_('Source exhibition'),
+        queryset=Exhibition.objects.none(),
+    )
+    source_piece = forms.ModelChoiceField(
+        label=_('Source piece'),
+        queryset=Piece.objects.none(),
+    )
+    keep_presentation = forms.BooleanField(
+        label=_('Keep legacy presentation contents and hierarchy'),
+        required=False,
+        help_text=_(
+            'Copies the current On Site and User Device folders and slides as drafts.'
+        ),
+    )
+
+    def __init__(self, *args, user, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['source_exhibition'].queryset = managed_exhibitions(user).order_by('title')
+        self.fields['source_piece'].queryset = (
+            managed_pieces(user)
+            .select_related('exhibition', 'slideshow_page')
+            .order_by('exhibition__title', 'date_created', 'pk')
+        )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        source_exhibition = cleaned_data.get('source_exhibition')
+        source_piece = cleaned_data.get('source_piece')
+        if (
+            source_exhibition
+            and source_piece
+            and source_piece.exhibition_id != source_exhibition.pk
+        ):
+            self.add_error('source_piece', _('Select a piece from the chosen exhibition.'))
+        return cleaned_data
+
+
 
 class PieceView(TemplateView):
     def get_context_data(self, **kwargs):
@@ -1208,6 +1247,33 @@ class PieceCreateView(CuratorRequiredMixin, LoginRequiredMixin, FormView):
         kwargs['include_default_name'] = len(self.attribute_definitions) == 0
         return kwargs
 
+    def get_clone_form(self):
+        data = None
+        if self.request.method == 'POST' and 'clone_piece_submit' in self.request.POST:
+            data = self.request.POST
+        return PieceCloneForm(data=data, user=self.request.user)
+
+    def post(self, request, *args, **kwargs):
+        if 'clone_piece_submit' not in request.POST:
+            return super().post(request, *args, **kwargs)
+
+        clone_form = self.get_clone_form()
+        if clone_form.is_valid():
+            return self._clone_piece(
+                clone_form.cleaned_data['source_piece'],
+                keep_presentation=clone_form.cleaned_data['keep_presentation'],
+            )
+
+        form = self.form_class(
+            attribute_definitions=self.attribute_definitions,
+            include_default_name=len(self.attribute_definitions) == 0,
+        )
+        return self.render_to_response(self.get_context_data(
+            form=form,
+            clone_form=clone_form,
+            show_clone_picker=True,
+        ))
+
     def form_valid(self, form):
         with transaction.atomic(): #attomic transaction to ensure piece and page creation are consistent
             self.object = Piece.objects.create(exhibition=self.exhibition)
@@ -1229,6 +1295,70 @@ class PieceCreateView(CuratorRequiredMixin, LoginRequiredMixin, FormView):
             {'name': attribute_name, 'value': value}
             for attribute_name, value in cleaned_values
         ]
+
+    def _clone_piece(self, source_piece, keep_presentation=False):
+        source_values = _piece_value_map(source_piece)
+        if self.attribute_definitions:
+            attributes = [
+                {
+                    'name': attribute_name,
+                    'value': source_values.get(attribute_name.lower()) or '?',
+                }
+                for attribute_name in self.attribute_definitions
+            ]
+        else:
+            attributes = [{
+                'name': 'Name',
+                'value': source_values.get('name') or str(source_piece),
+            }]
+
+        with transaction.atomic():
+            self.object = Piece.objects.create(
+                exhibition=self.exhibition,
+                attributes=attributes,
+            )
+            _ensure_piece_name_value(self.object)
+            self.default_piece_name = str(self.object)
+            if keep_presentation and source_piece.slideshow_page_id:
+                self._copy_piece_slideshow_tree(source_piece)
+            else:
+                self._ensure_piece_slideshow_tree()
+
+                source_image = _piece_shared_hero_image(source_piece)
+                if source_image:
+                    for page in _ensure_presentation_folders(self.object.slideshow_page).values():
+                        if page:
+                            page.hero_image = source_image
+                            page.save(update_fields=['hero_image'])
+
+        messages.success(
+            self.request,
+            _('Piece added from %(exhibition)s.') % {
+                'exhibition': source_piece.exhibition.title,
+            },
+        )
+        return redirect(self.get_success_url())
+
+    def _copy_piece_slideshow_tree(self, source_piece):
+        pieces_page = self._get_or_create_piece_parent()
+        piece_slug = ExhibitionCreateView._unique_child_slug(
+            pieces_page,
+            f"piece-{self.object.pk}",
+        )
+        copied_page = source_piece.slideshow_page.specific.copy(
+            recursive=True,
+            to=pieces_page,
+            update_attrs={
+                'title': self.default_piece_name,
+                'slug': piece_slug,
+            },
+            copy_revisions=False,
+            keep_live=False,
+            user=self.request.user,
+        )
+        self.object.slideshow_page = copied_page.specific
+        self.object.save(update_fields=['slideshow_page'])
+        return copied_page.specific
 
     def _get_or_create_piece_parent(self):
         exhibition_page = self.exhibition.slideshow_page
@@ -1289,8 +1419,20 @@ class PieceCreateView(CuratorRequiredMixin, LoginRequiredMixin, FormView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        clone_form = kwargs.get('clone_form') or self.get_clone_form()
         context['exhibition'] = self.exhibition
         context['has_piece_attributes'] = len(self.attribute_definitions) > 0
+        context['clone_form'] = clone_form
+        context['clone_exhibitions'] = clone_form.fields['source_exhibition'].queryset
+        context['clone_pieces'] = clone_form.fields['source_piece'].queryset
+        context['clone_selected_exhibition_id'] = str(
+            clone_form['source_exhibition'].value() or ''
+        )
+        context['clone_selected_piece_id'] = str(clone_form['source_piece'].value() or '')
+        context['show_clone_picker'] = kwargs.get(
+            'show_clone_picker',
+            clone_form.is_bound or self.request.GET.get('clone') == '1',
+        )
         return context
 
     def get_success_url(self):

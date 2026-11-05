@@ -83,7 +83,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'main_app',
-    'MIYP_maps',
     'rest_framework',
     'drf_yasg',
     'django_tables2',

@@ -16,6 +16,10 @@
         margin: 0;
         width: 100%;
     }
+
+    .clone-piece-panel[hidden] {
+        display: none;
+    }
 </style>
 
     <div class="right floated sixteen wide  column" id="content">
@@ -34,6 +38,86 @@
             <div class="row">
                 <div class="ui sixteen wide column">
                     <div class="ui segment">
+                        {% if not piece.pk %}
+                            <button
+                                class="ui labeled icon button"
+                                id="show-clone-piece"
+                                type="button"
+                                aria-controls="clone-piece-panel"
+                                aria-expanded="{% if show_clone_picker %}true{% else %}false{% endif %}"
+                            >
+                                <i class="copy icon"></i>
+                                {% trans "Add piece from exhibition..." %}
+                            </button>
+
+                            <div
+                                class="ui secondary segment clone-piece-panel"
+                                id="clone-piece-panel"
+                                {% if not show_clone_picker %}hidden{% endif %}
+                            >
+                                <form
+                                    class="ui form{% if clone_form.errors %} error{% endif %}"
+                                    method="post"
+                                    action="{% url 'main_app:piece-create' %}?exhibition_id={{ exhibition.pk }}"
+                                >
+                                    {% csrf_token %}
+                                    <div class="two fields">
+                                        <div class="field{% if clone_form.source_exhibition.errors %} error{% endif %}">
+                                            <label for="clone-source-exhibition">{% trans "Source exhibition" %}</label>
+                                            <select id="clone-source-exhibition" name="source_exhibition" required>
+                                                <option value="">{% trans "Choose an exhibition" %}</option>
+                                                {% for source_exhibition in clone_exhibitions %}
+                                                    <option
+                                                        value="{{ source_exhibition.pk }}"
+                                                        {% if clone_selected_exhibition_id == source_exhibition.pk|stringformat:"s" %}selected{% endif %}
+                                                    >{{ source_exhibition.title }}</option>
+                                                {% endfor %}
+                                            </select>
+                                            {% for error in clone_form.source_exhibition.errors %}
+                                                <div class="ui pointing red basic label">{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="field{% if clone_form.source_piece.errors %} error{% endif %}">
+                                            <label for="clone-source-piece">{% trans "Source piece" %}</label>
+                                            <select id="clone-source-piece" name="source_piece" required>
+                                                <option value="">{% trans "Choose a piece" %}</option>
+                                                {% for source_piece in clone_pieces %}
+                                                    <option
+                                                        value="{{ source_piece.pk }}"
+                                                        data-exhibition-id="{{ source_piece.exhibition_id }}"
+                                                        {% if clone_selected_piece_id == source_piece.pk|stringformat:"s" %}selected{% endif %}
+                                                    >{{ source_piece }}</option>
+                                                {% endfor %}
+                                            </select>
+                                            {% for error in clone_form.source_piece.errors %}
+                                                <div class="ui pointing red basic label">{{ error }}</div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    {% for error in clone_form.non_field_errors %}
+                                        <div class="ui error message">{{ error }}</div>
+                                    {% endfor %}
+                                    <div class="field">
+                                        <div class="ui checkbox">
+                                            {{ clone_form.keep_presentation }}
+                                            <label for="{{ clone_form.keep_presentation.id_for_label }}">
+                                                {{ clone_form.keep_presentation.label }}
+                                            </label>
+                                        </div>
+                                        {% if clone_form.keep_presentation.help_text %}
+                                            <div class="ui pointing basic label">
+                                                {{ clone_form.keep_presentation.help_text }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <button class="ui primary button" type="submit" name="clone_piece_submit" value="1">
+                                        {% trans "Add selected piece" %}
+                                    </button>
+                                </form>
+                            </div>
+                            <div class="ui divider"></div>
+                        {% endif %}
+
                         <form class="ui form{% if errors %} error{% endif %}" method="post" enctype="multipart/form-data">
                             {% csrf_token %}{{ form }}
 
@@ -107,5 +191,52 @@
             </div>
         </div>
     </div>
+
+    {% if not piece.pk %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const toggle = document.getElementById('show-clone-piece');
+            const panel = document.getElementById('clone-piece-panel');
+            const exhibitionSelect = document.getElementById('clone-source-exhibition');
+            const pieceSelect = document.getElementById('clone-source-piece');
+
+            if (!toggle || !panel || !exhibitionSelect || !pieceSelect) {
+                return;
+            }
+
+            const pieceOptions = Array.from(pieceSelect.options).slice(1);
+
+            function filterPieces() {
+                const exhibitionId = exhibitionSelect.value;
+                let availablePieces = 0;
+
+                pieceOptions.forEach(function (option) {
+                    const matches = Boolean(exhibitionId) && option.dataset.exhibitionId === exhibitionId;
+                    option.hidden = !matches;
+                    option.disabled = !matches;
+                    if (matches) {
+                        availablePieces += 1;
+                    }
+                });
+
+                const selectedOption = pieceSelect.options[pieceSelect.selectedIndex];
+                if (selectedOption && selectedOption.value && selectedOption.disabled) {
+                    pieceSelect.value = '';
+                }
+                pieceSelect.disabled = availablePieces === 0;
+            }
+
+            toggle.addEventListener('click', function () {
+                panel.hidden = !panel.hidden;
+                toggle.setAttribute('aria-expanded', panel.hidden ? 'false' : 'true');
+                if (!panel.hidden) {
+                    exhibitionSelect.focus();
+                }
+            });
+            exhibitionSelect.addEventListener('change', filterPieces);
+            filterPieces();
+        });
+    </script>
+    {% endif %}
 
 {% endblock %}

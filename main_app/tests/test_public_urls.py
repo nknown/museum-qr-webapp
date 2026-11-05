@@ -1,4 +1,6 @@
+from django.conf import settings
 from django.test import RequestFactory, SimpleTestCase, override_settings
+from django.urls import Resolver404, resolve
 
 from main_app.views.models_views import _build_public_absolute_uri
 
@@ -25,3 +27,10 @@ class PublicAbsoluteUrlTests(SimpleTestCase):
         url = _build_public_absolute_uri(request, '/presentation/piece/example')
 
         self.assertEqual(url, 'http://museum.example/presentation/piece/example')
+
+
+class RemovedMapsAppTests(SimpleTestCase):
+    def test_legacy_maps_app_is_not_installed_or_routed(self):
+        self.assertNotIn('MIYP_maps', settings.INSTALLED_APPS)
+        with self.assertRaises(Resolver404):
+            resolve('/MIYP_maps/apparatus/1/map')

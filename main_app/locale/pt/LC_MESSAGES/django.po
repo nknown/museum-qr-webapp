@@ -380,10 +380,6 @@ msgstr "FREE Quizes"
 msgid "Run"
 msgstr "Excecutar"
 
-#: free/templates/free/sponsor_logos.html:37
-msgid "Sponsors"
-msgstr "Patrocínio"
-
 #: free/videoConfig/templates/videoConfig.html:52
 msgid "Apparatus Information"
 msgstr "Informações do Aparato"
