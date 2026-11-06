@@ -54,6 +54,18 @@ cover/
 # Translation source templates are generated; compiled catalogs are shipped.
 *.pot
 
+# Local thesis, explanation, and LaTeX build artifacts are not application code.
+*.aux
+*.fdb_latexmk
+*.fls
+*.out
+*.pdf
+*.synctex.gz
+*.tex
+*.xdv
+/STEPS
+/issuesandsol.txt
+
 # Django stuff:
 *.log
 local_settings.py
