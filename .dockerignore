@@ -9,13 +9,13 @@ __pycache__/
 .venv/
 venv/
 
-MIYP/.env
+global_files/.env
 **/.env
 **/.env.*
 **/*.key
 **/*.pem
 **/*.crt
-MIYP/certificates/
+global_files/certificates/
 
 db.sqlite3
 db.sqlite3-*

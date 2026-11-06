@@ -48,15 +48,15 @@ msgstr ""
 msgid "In cir"
 msgstr ""
 
-#: MIYP/settings.py:189
+#: global_files/settings.py:189
 msgid "English"
 msgstr ""
 
-#: MIYP/settings.py:190
+#: global_files/settings.py:190
 msgid "Portuguese"
 msgstr ""
 
-#: MIYP/settings.py:191
+#: global_files/settings.py:191
 msgid "Spanish"
 msgstr ""
 

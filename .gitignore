@@ -75,8 +75,8 @@ local_settings.py
 # Runtime uploads and generated deployment state.
 main_app/media/*
 !main_app/media/.gitkeep
-MIYP/certificates/*
-!MIYP/certificates/.gitkeep
+global_files/certificates/*
+!global_files/certificates/.gitkeep
 Feeder/*
 !Feeder/.gitkeep
 

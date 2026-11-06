@@ -19,15 +19,15 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Translated-Using: django-rosetta 0.10.1\n"
 
-#: MIYP/settings.py:185
+#: global_files/settings.py:185
 msgid "English"
 msgstr "Inglês"
 
-#: MIYP/settings.py:186
+#: global_files/settings.py:186
 msgid "Portuguese"
 msgstr "Português"
 
-#: MIYP/settings.py:187
+#: global_files/settings.py:187
 msgid "Spanish"
 msgstr "Castelhano"
 

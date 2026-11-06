@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 env = environ.Env()
-environ.Env.read_env(BASE_DIR / 'MIYP' / '.env')
+environ.Env.read_env(BASE_DIR / 'global_files' / '.env')
 
 
 # URL used in Wagtail-generated absolute links (emails, user bar, etc.)
@@ -114,7 +114,7 @@ MIDDLEWARE = [
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'MIYP.middleware.GoogleOAuthLoopbackRedirectMiddleware',
+    'global_files.middleware.GoogleOAuthLoopbackRedirectMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'main_app.middleware.UserDeviceEnglishMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -127,7 +127,7 @@ MIDDLEWARE = [
 
 ]
 
-ROOT_URLCONF = 'MIYP.urls'
+ROOT_URLCONF = 'global_files.urls'
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
@@ -148,7 +148,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'MIYP.wsgi.application'
+WSGI_APPLICATION = 'global_files.wsgi.application'
 
 
 # Database
