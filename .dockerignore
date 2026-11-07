@@ -9,7 +9,7 @@ __pycache__/
 .venv/
 venv/
 
-global_files/.env
+.env
 **/.env
 **/.env.*
 **/*.key

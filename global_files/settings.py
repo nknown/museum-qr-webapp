@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 env = environ.Env()
-environ.Env.read_env(BASE_DIR / 'global_files' / '.env')
+environ.Env.read_env(BASE_DIR / '.env')
 
 
 # URL used in Wagtail-generated absolute links (emails, user bar, etc.)

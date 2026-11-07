@@ -9,26 +9,26 @@ also provides presentation, interaction, and analytics tools for curators.
 1. Create a local environment file:
 
    ```bash
-   cp global_files/.env.example global_files/.env
+   cp .env.example .env
    ```
 
-2. Replace every placeholder in `global_files/.env`. Generate independent random
+2. Replace every placeholder in `.env`. Generate independent random
    values for `MAIN_APP_SECRET` and `POSTGRES_DB_PASSWORD`; never commit this
    file.
 
 3. Build the services and prepare the database:
 
    ```bash
-   docker compose --env-file global_files/.env build
-   docker compose --env-file global_files/.env up -d db
-   docker compose --env-file global_files/.env run --rm web python manage.py migrate
-   docker compose --env-file global_files/.env run --rm web python manage.py createsuperuser
+   docker compose build
+   docker compose up -d db
+   docker compose run --rm web python manage.py migrate
+   docker compose run --rm web python manage.py createsuperuser
    ```
 
 4. Start the application:
 
    ```bash
-   docker compose --env-file global_files/.env up
+   docker compose up
    ```
 
 The reverse proxy serves the application over HTTPS on port `8000`. The local
@@ -52,7 +52,7 @@ python manage.py test
 
 ## Security
 
-Only `global_files/.env.example` is tracked. Real environment files, databases,
+Only `.env.example` is tracked. Real environment files, databases,
 uploaded media, certificates, private keys, and generated static files are
 ignored. If a credential is ever committed, revoke or rotate it immediately;
 deleting the file in a later commit does not remove it from Git history.
