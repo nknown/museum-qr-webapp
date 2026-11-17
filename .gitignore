@@ -285,3 +285,6 @@ FREE_maps/
 /benchmarks/config/presentations.txt
 /benchmarks/.venv/
 /benchmarks/**/*-session-keys.txt
+/benchmarks/content/presentations.txt
+/benchmarks/content/generated_benchmark_media/
+/benchmarks/content/PRESENTATION_CONTENT_MANIFEST.json

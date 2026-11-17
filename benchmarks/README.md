@@ -17,11 +17,15 @@ sessions and access records as ordinary anonymous visits.
 - `requester/` contains the general launcher and the two experimental profiles.
 - `server/monitor_server.sh` samples host, container, proxy, and database state.
 - `cleanup_sessions.py` previews or removes database rows created by a run.
+- `content/` reproduces the populated, media-rich presentation dataset used by
+  the final performance campaign.
 - `config/` contains safe examples rather than deployment addresses or UUIDs.
 - `results/` is intentionally ignored except for its placeholder.
 
 See [requester/README.md](requester/README.md) and
-[server/README.md](server/README.md) for commands and output definitions.
+[server/README.md](server/README.md) for commands and output definitions. The
+snapshot-specific authoring procedure is documented in
+[content/README.md](content/README.md).
 
 ## Reproduction workflow
 

@@ -29,6 +29,9 @@ benchmarks/results/
 benchmarks/config/benchmark.env
 benchmarks/config/presentations.txt
 benchmarks/.venv/
+benchmarks/content/presentations.txt
+benchmarks/content/generated_benchmark_media/
+benchmarks/content/PRESENTATION_CONTENT_MANIFEST.json
 
 *.aux
 *.fdb_latexmk
