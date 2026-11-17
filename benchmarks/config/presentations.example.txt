@@ -1,0 +1,3 @@
+# Copy this file to presentations.txt. Use public UUID presentation paths only.
+/presentation/exhibition/REPLACE_WITH_PUBLIC_UUID
+/presentation/piece/REPLACE_WITH_PUBLIC_UUID

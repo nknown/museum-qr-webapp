@@ -25,6 +25,10 @@ static/
 staticfiles/
 main_app/media/
 Feeder/
+benchmarks/results/
+benchmarks/config/benchmark.env
+benchmarks/config/presentations.txt
+benchmarks/.venv/
 
 *.aux
 *.fdb_latexmk

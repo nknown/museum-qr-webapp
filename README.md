@@ -42,12 +42,20 @@ With the dependencies and environment configured:
 python manage.py test
 ```
 
+## Performance evaluation
+
+Reproducible requester and server-monitoring tools are documented in
+[`benchmarks/README.md`](benchmarks/README.md). Generated measurements, local
+targets, certificates, and session identifiers are deliberately excluded from
+version control.
+
 ## Project layout
 
 - `global_files/` — Django project settings, URLs, middleware, and translations.
 - `main_app/` — museum models, views, templates, administration, and tests.
-- `MIYP_maps/` — map views and frontend assets.
 - `docker/` — application and Nginx container configuration.
+- `benchmarks/` — requester workloads, browser transfer measurement, and
+  server monitoring.
 - `Feeder/` — local import drop folder; imported data is intentionally ignored.
 
 ## Security

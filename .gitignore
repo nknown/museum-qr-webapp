@@ -277,3 +277,11 @@ geoip_db/
 *.mmdb
 *-journal
 FREE_maps/
+
+# Performance evaluation output and local benchmark configuration.
+/benchmarks/results/*
+!/benchmarks/results/.gitkeep
+/benchmarks/config/benchmark.env
+/benchmarks/config/presentations.txt
+/benchmarks/.venv/
+/benchmarks/**/*-session-keys.txt
