@@ -31,6 +31,10 @@ benchmarks/.venv/
 benchmarks/content/presentations.txt
 benchmarks/content/generated_benchmark_media/
 benchmarks/content/PRESENTATION_CONTENT_MANIFEST.json
+deployment/deployment.env
+deployment/tls/
+deployment/backups/
+.docker-home/
 
 *.aux
 *.fdb_latexmk

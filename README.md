@@ -34,6 +34,13 @@ also provides presentation, interaction, and analytics tools for curators.
 The reverse proxy serves the application over HTTPS on port `8000`. The local
 certificate is self-signed, so a browser warning is expected in development.
 
+## University deployment
+
+The hardened profile for a real university hostname and institution-issued
+HTTPS certificate is documented in [`deployment/README.md`](deployment/README.md).
+It uses the assigned public origin directly and does not include the local
+workstation OAuth callback bridge.
+
 ## Tests
 
 With the dependencies and environment configured:
@@ -54,6 +61,7 @@ version control.
 - `global_files/` — Django project settings, URLs, middleware, and translations.
 - `main_app/` — museum models, views, templates, administration, and tests.
 - `docker/` — application and Nginx container configuration.
+- `deployment/` — hardened university deployment profile and instructions.
 - `benchmarks/` — requester workloads, browser transfer measurement, and
   server monitoring.
 - `Feeder/` — curated spreadsheet import datasets and usage documentation.

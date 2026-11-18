@@ -293,3 +293,10 @@ FREE_maps/
 /benchmarks/content/presentations.txt
 /benchmarks/content/generated_benchmark_media/
 /benchmarks/content/PRESENTATION_CONTENT_MANIFEST.json
+
+# Private university deployment state.
+/deployment/deployment.env
+/deployment/tls/*
+!/deployment/tls/.gitkeep
+/deployment/backups/
+/.docker-home/

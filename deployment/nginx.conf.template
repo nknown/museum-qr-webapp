@@ -1,0 +1,78 @@
+upstream miyp { server web:8000; }
+server_tokens off;
+# Record latency and limiter state without IPs, query strings or session cookies.
+log_format miyp '$time_iso8601 $request_method $uri $status '
+                '$body_bytes_sent $request_time $upstream_response_time $limit_req_status';
+access_log /var/log/nginx/access.log miyp;
+map "$request_method:$uri" $login_key {
+    default '';
+    ~^POST:/(login/?|admin/login/|cms/login/)$ $binary_remote_addr;
+}
+limit_req_zone $login_key zone=login:10m rate=5r/m;
+limit_req_zone $binary_remote_addr zone=telemetry:10m rate=20r/s;
+limit_req_status 429;
+
+server {
+    listen 8080;
+    location = /health/nginx { access_log off; return 200 'ok'; }
+    location / { return 404; }
+}
+server {
+    listen 80 default_server;
+    server_name _;
+    return 444;
+}
+server {
+    listen 80;
+    server_name ${PUBLIC_HOSTNAME};
+    return 301 ${PUBLIC_ORIGIN}$request_uri;
+}
+server {
+    listen 443 ssl default_server;
+    ssl_certificate /etc/nginx/certs/fullchain.pem;
+    ssl_certificate_key /etc/nginx/certs/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    server_name _;
+    return 444;
+}
+server {
+    listen 443 ssl;
+    server_name ${PUBLIC_HOSTNAME};
+    ssl_certificate /etc/nginx/certs/fullchain.pem;
+    ssl_certificate_key /etc/nginx/certs/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 1d;
+    client_max_body_size 100m;
+    add_header X-Content-Type-Options nosniff always;
+    add_header Referrer-Policy same-origin always;
+    limit_req zone=login burst=5 nodelay;
+
+    location /static/ {
+        alias /srv/static/;
+        expires 1h;
+    }
+    # These paths would otherwise bypass Wagtail's document permission checks.
+    location ^~ /images/documents/ { return 404; }
+    location ~* ^/images/.*\.(html?|svg|xml|js|mjs|xhtml)$ { return 404; }
+    location /images/ { alias /srv/media/; }
+
+    # Overwrite forwarded headers; never trust values supplied by the client.
+    proxy_set_header Host $http_host;
+    proxy_set_header X-Forwarded-Host $http_host;
+    proxy_set_header X-Forwarded-Proto https;
+    proxy_set_header X-Forwarded-Port ${HTTPS_PORT};
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $remote_addr;
+    proxy_http_version 1.1;
+    proxy_set_header Connection '';
+    proxy_read_timeout 65s;
+    proxy_connect_timeout 5s;
+
+    location ~ ^/presentation-access/[0-9]+/slide$ {
+        limit_req zone=telemetry burst=100 nodelay;
+        limit_req_dry_run ${TELEMETRY_LIMIT_DRY_RUN};
+        proxy_pass http://miyp;
+    }
+    location / { proxy_pass http://miyp; }
+}
