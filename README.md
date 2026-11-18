@@ -56,7 +56,7 @@ version control.
 - `docker/` — application and Nginx container configuration.
 - `benchmarks/` — requester workloads, browser transfer measurement, and
   server monitoring.
-- `Feeder/` — local import drop folder; imported data is intentionally ignored.
+- `Feeder/` — curated spreadsheet import datasets and usage documentation.
 
 ## Security
 

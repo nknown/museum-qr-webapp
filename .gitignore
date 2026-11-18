@@ -89,8 +89,13 @@ main_app/media/*
 !main_app/media/.gitkeep
 global_files/certificates/*
 !global_files/certificates/.gitkeep
+# Curated feeder examples and their documentation are reproducibility inputs.
+# Other local drop-folder content remains untracked by default.
 Feeder/*
-!Feeder/.gitkeep
+!Feeder/*.ods
+!Feeder/*.xlsx
+!Feeder/*.xls
+!Feeder/*.md
 
 # Flask stuff:
 instance/
